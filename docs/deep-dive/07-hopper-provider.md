@@ -252,7 +252,7 @@ Safety properties enforced in the bridge:
 
 ### 3.1 Schema (verbatim)
 
-`src/hopper/protocol.ts:11-83`:
+`src/hopper/protocol.ts:11-79`:
 
 ```ts
 const remoteErrorSchema = z
