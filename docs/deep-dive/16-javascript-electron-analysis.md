@@ -17,8 +17,8 @@ Given a directory or `.asar`, `analyze_javascript_application` builds a provider
 | Domain (fuses) | `src/domain/electron/electronFuses.ts` | 1 | Fuse wire constants, report schema, derivation of runtime implications |
 | Application | `src/application/javascript/` | 66 files total | Orchestration: reconstruction pipeline, graph builder, Evidence construction, workflow services, runtime reconciliation service |
 | Application (fuses) | `src/application/electron/ElectronFuseService.ts` | 1 | Fuse service |
-| Worker + sourcemap + recovery adapters | `src/javascript/{analysis,sourceMaps,recovery}/` | 24 files | Isolated worker process protocol; source-map codec process; Wakaru adapter |
-| Fuse adapter | `src/electron/` | 4 files | Binary reader (`ElectronFuseReader.ts`), path admission (`ElectronFusePath.ts`), provider |
+| Worker + sourcemap + recovery adapters | `src/javascript/{analysis,sourceMaps,recovery}/` | 20 non-test files (29 with tests; verified by `find`) | Isolated worker process protocol; source-map codec process; Wakaru adapter |
+| Fuse adapter | `src/electron/` | 3 non-test files (4 with the provider test) | Binary reader (`ElectronFuseReader.ts`), path admission (`ElectronFusePath.ts`), provider |
 | Artifact readers | `src/artifacts/` (`AsarArtifactReader.ts`, `AsarHeader.ts`, `DirectoryArtifactReader.ts`, `inventory/`, `javascript/`) | - | Hardened ASAR/directory inventory and bounded file reads |
 | Composition | `src/composition/javascriptAnalysisWorkerProcess.ts` (the **worker entry point**), `javascriptRecovery.ts`, `electronFuses.ts`, `electronObservation.ts`, `electronScenario.ts`, `javascriptRuntimeObservation.ts` | - | Wires ports to adapters (`package.json` maps `#javascript-analysis-worker` to `./dist/composition/javascriptAnalysisWorkerProcess.js`, `package.json:37-39`) |
 | MCP registration | `src/server/registerApplicationTools/{traceFeature,traceSemantics,compareVersions,compareSourceToBundle,compareExportShapes}.ts`, `registerJavaScriptRecoveryTool.ts`, `registerElectronTools.ts` | - | Tool handlers bound to named contracts |
@@ -163,7 +163,7 @@ const applicationAnalysisResultShape = z.strictObject({
   graph: javascriptApplicationGraphSchema,
   summary: electronBoundarySummarySchema,
   statistics: reconstructionStatisticsSchema,
-  limitations: z.array(z.string()),
+  limitations: z.array(z.string().min(1)),
   semantic_graph: javaScriptSemanticGraphSchema,
 });
 ```
@@ -192,7 +192,7 @@ flowchart TD
   E --> O[Evidence returned inline or retained plus summary]
 ```
 
-*Caption: end-to-end flow for one analysis. Phase names match `options.progress.report` phases in `src/application/javascript/JavaScriptApplicationService.ts:57-106`.*
+*Caption: end-to-end flow for one analysis. The three application-level phases `analyze_javascript_application`, `validate_javascript_application_result`, `create_javascript_application_evidence` come from `options.progress.report` in `src/application/javascript/JavaScriptApplicationService.ts:57-106`; a real CLI run (RUN, see Verification note at the end) emits a longer `rea_progress` sequence on stderr: `analyze_javascript_application`, `read_javascript_artifacts`, `parse_javascript_sources`, `parse_javascript_source`, `build_javascript_application_graph`, `seal_javascript_application_graph`, `build_javascript_semantic_graph`, `seal_javascript_semantic_graph`, `seal_javascript_application_result`, `validate_javascript_application_result`, `create_javascript_application_evidence`, `hash_javascript_application_evidence`, `validate_javascript_application_evidence` (the extra phases are emitted by the reconstruction/graph/evidence helpers, not by this file).*
 
 Walkthrough (code anchors):
 
@@ -457,10 +457,10 @@ resolved native add-on exposes requested binding (not a verified binary export)
 
 - `AsarArtifactReader` (`src/artifacts/AsarArtifactReader.ts:36-`) range-streams entries; header bounded at 16 MiB (`AsarHeader.ts:7`). Direct ASAR inputs and filesystem-backed ASARs nested under a directory are supported; mismatched nested ASARs stay opaque.
 - **Unpacked entries are not an integrity exemption**: companion bytes in `<archive>.unpacked` are hashed against the declared integrity (`AsarArtifactReader.ts:36-41`).
-- `integrity_policy: fail` (default) returns a failure with logical path, declared vs calculated SHA-256; `record-and-continue` analyses observed bytes marked `observed-untrusted`, sets graph coverage partial and lists every contradicted path in limitations (`docs/javascript-artifact-reconstruction.md:146-163`).
+- `integrity_policy: fail` (default) returns a failure with logical path, declared vs calculated SHA-256; `record-and-continue` analyses observed bytes, records each contradiction in `normalized_result.integrity_contradictions[]` with `trust: "observed-untrusted"` (plus declared/observed SHA-256 and `provenance: container-integrity-metadata-versus-observed-bytes`), sets graph coverage `partial` and lists every contradicted path in limitations (`docs/javascript-artifact-reconstruction.md:146-163`). **RUN:** on `samples/jsapp` packed into an ASAR with `@electron/asar` 4.2.0 the default policy exits 1 with `code: artifact_integrity_mismatch` and `details {logical_path, declared_sha256, calculated_sha256, unpacked}`; `--integrity-policy record-and-continue` succeeds with coverage `partial` and the limitation `Artifact integrity metadata contradicts observed bytes at src/net.js; the observed bytes are untrusted.`
 - Missing unpacked companions remain `unavailable` (`hash_status: unavailable`), with no content-addressed child artifact invented.
 
-*Malware relevance:* `record-and-continue` is the correct mode for tampered/trojanised Electron installers (modified `app.asar` with stale integrity metadata), but every graph fact is then `observed-untrusted` and coverage is partial by construction. See 23 for playbook use.
+*Malware relevance:* `record-and-continue` is the correct mode for tampered/trojanised Electron installers (modified `app.asar` with stale integrity metadata), but the contradiction records carry `trust: observed-untrusted` (the string does not appear inside graph node observations in a RUN of this mode - graph facts keep their normal authority/state values) and coverage is partial by construction. See 23 for playbook use.
 
 ## 16.9 Semantic relation graph and `trace_javascript_semantics`
 
@@ -763,6 +763,19 @@ Core function: `reconcileJavaScriptRuntime` (`src/domain/javascript/javascriptRu
 - **Discrepancy:** brief/docs call the graph "JS/Electron only"; the code enum also holds `managed-*` kinds (16.6.2).
 - **Discrepancy (house-rules doc vs code):** the user's attached CLAUDE.md mentions only Hopper/Ghidra; this whole subsystem and `third_party/wakaru` post-date it.
 - `docs/javascript-application-graph.md:3-8` says the graph is "not ... a new CLI/MCP tool": true of the *domain model*; the tools in 16.3 are separate services over it.
+
+## 16.17 Verification run status (RUN / DOC)
+
+| Flow | Status | What was observed |
+|---|---|---|
+| `analyze-javascript-application` on `samples/jsapp` (directory) | RUN | exit 0 in about 3 s; `provider.id=rea-javascript-application`, `predicate_type=rea.javascript-application-analysis`, `confidence=derived`, `authority=shipped-artifact`; `summary` shows 1 BrowserWindow, 1 preload, 1 contextBridge API, 2 IPC operations with 1 paired renderer transmission and 1 main handler; `statistics` 6 relevant files, 4 parsed, 274 AST nodes, 0 parse failures; graph 36 nodes / 48 edges, coverage `complete` |
+| Same on `samples/jsapp2`, then `compare-application-versions` / `trace-application-feature` (seed `channel` `run-task`) / `trace-javascript-semantics` (seed `endpoint` `http`) | RUN | comparison Evidence `rea.application-version-comparison`, `inferred`, `analyst-inference` (summary unchanged 17 / added 16 / removed 16 / changed 3 / unknown 0); feature trace matched the `ipc-channel` node by `label`; semantic query with seed `http` matched nothing (`status: partial`, `seed_node_ids: []`) |
+| MCP path: `analyze_javascript_application {detail: summary}` then `inspect_analysis_view` (retained-evidence page of `modules`) and `trace_application_feature` on the same connection | RUN | summary result carries `normalized_result.kind = "summary"` and `parent_evidence_id`; the retained id was accepted by both follow-up tools |
+| `--source-path package.json --source-path src/main.js` | RUN | `source_selection.requested_paths` 2, `unselected_files` 4, only 1 JS file parsed (113 AST nodes) |
+| ASAR analysis and integrity (`app.asar` built with `@electron/asar`, then one byte flipped inside `src/net.js`) | RUN | clean ASAR: `format: asar`, `integrity_contradictions: []`, coverage `complete`; tampered: default `fail` exits 1 with `artifact_integrity_mismatch` (path plus both hashes); `record-and-continue` returns one contradiction with `trust: observed-untrusted`, coverage `partial` |
+| `inspect-electron-fuses` on an ELF without a sentinel and on a hand-made ELF carrying the sentinel and 9 fuse bytes | RUN | no sentinel gives `sentinel_count: 0`, `runtime_implications: []` and the limitation that state is unknown, not disabled; the fabricated wire (`wire_version 1`, `declared_length 9`) yields per-fuse `state` (`disabled`/`enabled`/`removed`, raw bytes 48/49/114) and derived implications; with fuse 4 enabled on an ELF the `embedded_asar_integrity_validation` outcome is `unknown`, as documented |
+| `recover-javascript-sources` | RUN (negative) | Wakaru is not installed; the tool fails with `code: capability_unavailable` and the message "Provide an absolute REA_WAKARU_COMMAND pointing to a Wakaru ^1.13.0 Linux x64 binary ..." (`/usr/bin/prlimit` is present). The successful path, its prlimit invocation and output tree layout are therefore DOC only |
+| `reconcile_javascript_runtime` | DOC | not executed here |
 
 ## Porting notes
 

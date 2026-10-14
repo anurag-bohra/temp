@@ -261,7 +261,7 @@ Line and file counts exclude `*.test.ts` only. "Layer" uses the vocabulary of Fi
 | `process/` | 45 / 10,085 (+ `process/capture` 15) | Kernel | Owned process supervision primitives (section 9) |
 | `windows/` | 3 / 806 | Kernel | `WindowsNativeLoader`, `WindowsOwnedProcess`, `WindowsPrivateRuntime`: TypeScript side of the Windows Node-API addon |
 | `filesystem/` | 6 / 514 | Kernel | `OwnedFileHandle`, `OwnedDirectoryHandle`, `OwnedStagedOutput`, `RegularFile`, `StableFileHash`, `readFileHandleChunks`: handle-based, close-once file primitives |
-| `artifacts/` | 47 / 12,383 | Provider (+kernel) | Safe artifact graph provider: readers for directory, ASAR, ZIP, Mach-O slices, native DMG mount; inventory/extraction (`inventory/`, `extraction/`), Apple (`apple/`, 9), JavaScript artifact access (`javascript/`), `SafeOutputTree*`, `ArtifactResourceScope` |
+| `artifacts/` | 47 / 12,383 | Provider (+kernel) | Safe artifact graph provider: readers for directory, ASAR, ZIP, Mach-O slices, native DMG mount; inventory/extraction (`inventory/`, `extraction/`), Apple (`apple/`, 11), JavaScript artifact access (`javascript/`), `SafeOutputTree*`, `ArtifactResourceScope` |
 | `hopper/` | 22 / 5,262 | Deep provider | Hopper launch (`BridgeLauncher.ts`), Unix-socket client and protocol (`HopperClient.ts`, `protocol.ts`), request queue, target lease, regex search worker. Bridge: `bridge/hopper_bridge.py`. Chapter 07 |
 | `ghidra/` | 45 / 11,096 | Deep provider | Ghidra discovery, headless launch (`GhidraLauncher.ts`, `GhidraJavaLaunch.ts`), per-architecture profiles (MIPS, PowerPC, RISC-V, PSP, PE, raw), wire/transport, extensions (NativeAOT). Bridge: `bridge/ghidra/*.java`. Chapter 08 |
 | `ida/` | 16 / 3,992 | Deep provider | Adapter over an external `ida-pro-mcp` (MCP client connection), diagnostics redaction, workspace. Chapter 09 |
@@ -427,7 +427,7 @@ dist/
   composition/javascriptAnalysisWorkerProcess.js   worker entry via "#javascript-analysis-worker"
 ```
 
-**Finding (this checkout):** `dist/` contains the tsc output (42 subdirectories, `dist/main.js`, `dist/cli.js`) but neither `dist/mcp/` nor `dist/cli-runtime/`. Running `node scripts/rea.mjs mcp` prints "REA's compiled runtime is missing. Run `npm ci && npm run build:cached` ..." (observed; message from `scripts/rea.mjs:49-53`). `node dist/main.js` works directly because `dist/main.js` is the unbundled entry and has its own direct-entrypoint check (`src/main.ts:114-128`). All live MCP captures in chapter 03 were made with `node dist/main.js`. In a normal build `npm run compile` would produce the bundle; here the bundle step evidently did not run (**INFERRED**: the checkout was built with `tsc -p tsconfig.build.json` only).
+**Finding (as first observed; superseded):** `dist/` originally contained the tsc output (42 subdirectories, `dist/main.js`, `dist/cli.js`) but neither `dist/mcp/` nor `dist/cli-runtime/`. *Verification update:* both directories now exist (created 12:20 on 2026-10-14, after this chapter was written) and `node scripts/rea.mjs <command>` and `node scripts/rea.mjs mcp` both work (RUN during verification of chapters 16/17), so the statements below describe the earlier state. Running `node scripts/rea.mjs mcp` prints "REA's compiled runtime is missing. Run `npm ci && npm run build:cached` ..." (observed; message from `scripts/rea.mjs:49-53`). `node dist/main.js` works directly because `dist/main.js` is the unbundled entry and has its own direct-entrypoint check (`src/main.ts:114-128`). All live MCP captures in chapter 03 were made with `node dist/main.js`. In a normal build `npm run compile` would produce the bundle; here the bundle step evidently did not run (**INFERRED**: the checkout was built with `tsc -p tsconfig.build.json` only).
 
 ### 5.5 The dispatcher: `scripts/rea.mjs`
 
@@ -629,7 +629,7 @@ export const mcpResponseBudgetSchema = z
 | `REA_IDA_MCP_CONFIG` | absolute path to an IDA MCP registration JSON (max 64 KiB, `src/ida/IdaConfiguration.ts:64`) | unset (IDA unavailable) | `environment.ts:28-32`; `src/doctorRuntime.ts:29` | Enables the IDA provider |
 | `GHIDRA_INSTALL_DIR` | absolute | unset | `environment.ts:33-37` | Ghidra install root |
 | `JAVA_HOME` | absolute | unset | `environment.ts:38-42` | JDK for Ghidra and JADX (`src/android/JadxConfiguration.ts` runs `$JAVA_HOME/bin/java --list-modules`) |
-| `REA_GHIDRA_NATIVEAOT_JAR` | absolute | unset | `environment.ts:43-47` | Optional NativeAOT recovery extension JAR (Linux x86-64 only: `src/ghidra/extensions/nativeaot/NativeAotAdapter.ts:14`) |
+| `REA_GHIDRA_NATIVEAOT_JAR` | absolute | unset | `environment.ts:43-47` | Optional NativeAOT recovery extension JAR (Linux **host** only; the target must additionally be an x86-64 ELF or native PE that is not managed: `src/ghidra/extensions/nativeaot/NativeAotAdapter.ts:8-27`) |
 | `REA_GHIDRA_STARTUP_TIMEOUT_MS` | decimal int 1..2,147,483,647 | `330000` | `environment.ts:48-50` | Absolute deadline for Ghidra import, analysis, bridge and readiness |
 | `REA_HOPPER_STARTUP_TIMEOUT_MS` | same | `120000` | `environment.ts:51-53` | Same for Hopper |
 | `REA_SWIFTC_COMPILE_TIMEOUT_MS` | same | `120000` | `environment.ts:54-56`; `src/process/DarwinProcessRunTokenReader.ts:96` | macOS ownership-helper `swiftc` compile deadline |
@@ -683,7 +683,7 @@ export const mcpResponseBudgetSchema = z
 |---|---|---|
 | `REA_PACKAGE_VERSION` | `scripts/rea.mjs:13` | Exported to the process; I found no consumer in `src/` (**INFERRED** informational / for child processes) |
 | `REA_PROCESS_RUN_ID` | `src/process/ProviderProcess.ts:205`; `src/process/capture/ProcessCaptureEnvironment.ts:23`; `src/browser/PlaywrightElectronActiveProvider.ts:402` | Per-run token injected into owned children so cleanup can prove ownership of descendants by reading their environment (`src/process/ProcessOwnership.ts:228`). Capture scenarios may not set it themselves (`src/domain/process/processScenario.ts:17`) |
-| `GHIDRA_JAVA_OPTIONS`, `JDK_JAVA_OPTIONS`, `GHIDRA_HEADLESS_JAVA_OPTIONS` | cleared by `src/ghidra/GhidraInstallation.ts:623`, `GhidraLauncher.ts:853-865` | Prevent ambient JVM options from changing Ghidra's launch |
+| `_JAVA_OPTIONS`, `JAVA_TOOL_OPTIONS`, `JDK_JAVA_OPTIONS`, `GHIDRA_JAVA_OPTIONS` (and `GHIDRA_HEADLESS_JAVA_OPTIONS`) | blanked by `src/ghidra/GhidraInstallation.ts:616-624`; `GhidraLauncher.ts:845-866` then supplies provider-owned `JDK_JAVA_OPTIONS`/`GHIDRA_HEADLESS_JAVA_OPTIONS` (empty on POSIX; `-Duser.home`, `-Djava.io.tmpdir`, `-XX:-UsePerfData` on Windows) | Prevent ambient JVM options from changing Ghidra's launch |
 | `DEBUGINFOD_URLS` | forced to `""` for objdump (`src/composition/reverseEngineering.ts:26`) | Prevent network debuginfo fetches |
 
 **D. Installer / test only (not read by the shipped runtime):** `REA_VERSION` (`install.sh:18`), `REA_CI_TEST_HISTORY` (`vitest.config.ts`), `REA_VERIFY_*`, `REA_NATIVEAOT_*`, `REA_CLANG`, `REA_CC`, `REA_READINESS_REPORT_PATH`, `REA_HOPPER_CONFORMANCE_MANIFEST_PATH`, `REA_CUTTER_EXPECTED_VERSION` (verification scripts under `scripts/`).
