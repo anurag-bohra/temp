@@ -1,4 +1,4 @@
-export type Kind = "elf" | "pe" | "macho" | "dex" | "java-class" | "script" | "zip" | "gzip" | "tar" | "asar" | "xz" | "bzip2" | "7z" | "rar" | "sqlite" | "pdf" | "image" | "wasm" | "xml" | "text" | "empty" | "data";
+export type Kind = "elf" | "pe" | "macho" | "dex" | "java-class" | "script" | "zip" | "gzip" | "tar" | "asar" | "xz" | "bzip2" | "7z" | "rar" | "sqlite" | "pdf" | "image" | "wasm" | "xml" | "android-binary-xml" | "text" | "empty" | "data";
 
 export function looksLikeTarHeader(b: Buffer): boolean {
   if (b.length < 512) return false;
@@ -18,6 +18,7 @@ export function detectKind(head: Buffer): Kind {
   const u32be = n >= 4 ? head.readUInt32BE(0) : 0;
   if (n >= 4 && u32be === 0x7f454c46) return "elf";
   if (n >= 4 && head.subarray(0, 4).toString("latin1") === "dex\n") return "dex";
+  if (n >= 8 && head[0] === 0x03 && head[1] === 0x00 && head[2] === 0x08 && head[3] === 0x00) return "android-binary-xml";
   if (n >= 4 && (u32be === 0xfeedface || u32be === 0xfeedfacf || u32be === 0xcefaedfe || u32be === 0xcffaedfe)) return "macho";
   if (n >= 8 && u32be === 0xcafebabe) return head.readUInt32BE(4) < 45 ? "macho" : "java-class";
   if (n >= 2 && head[0] === 0x4d && head[1] === 0x5a) return "pe";

@@ -66,3 +66,7 @@ Status date: end of the "complete all pending" round. Everything is committed to
 
 ## 6. Scope reminders
 No real malware was handled; all samples are benign demos with inert indicators (`example.invalid`, TEST-NET). The vulnerability chapter stays at triage/analysis level. REA itself excludes exploit-payload automation, packer/anti-debug-evasion and DRM-bypass workflows (`CONTRIBUTING.md`).
+
+
+## 7. Update: toolkit implementations (blueprints 01–14)
+Code now exists in [`/toolkit`](../../toolkit/README.md) (14 packages, last run: all packages typecheck; 192 tests pass; 2 fail in `mcp-gateway`; 1 skipped in `sandbox`). Fully done and cross-checked against real REA data: `evidence`, `effects`, `unknowns`, `provider-router`, `ghidra-bridge`, `prompts-skills`, `triage` core. Built but with their implementers stopped before final review: `js-analyzer`, `dotnet-analyzer`, `artifacts`, `browser-observer`, `sandbox`. **Incomplete:** `mcp-gateway` (2 failing tests) and the wiring of the analyzer packages into the triage pipeline. **Unverified:** `hopper-bridge` (skeleton). This supersedes R4/R5 above: the triage layer and sub-tool implementations now exist as code, but are not production-ready and not independently reviewed. See the toolkit README for the exact status table.

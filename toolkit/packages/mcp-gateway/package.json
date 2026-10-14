@@ -1,3 +1,3 @@
 { "name": "@rtk/mcp-gateway", "version": "0.1.0", "type": "module", "exports": { ".": "./src/index.ts" }, "bin": { "rtk-gateway": "./bin/rtk-gateway.ts" },
   "scripts": { "test": "node --test \"test/**/*.test.ts\"" },
-  "dependencies": { "@rtk/effects": "*", "@modelcontextprotocol/sdk": "^1.0.0" } }
+  "dependencies": { "@rtk/effects": "*", "@rtk/evidence": "*", "@modelcontextprotocol/sdk": "^1.0.0" } }

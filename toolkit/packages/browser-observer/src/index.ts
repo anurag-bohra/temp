@@ -3,6 +3,7 @@ import { arch, platform, tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium, type BrowserContext, type Page, type Request, type Response } from "playwright-core";
 import { createEvidence, type Evidence } from "@rtk/evidence";
+import { EgressProxy } from "./egress-proxy.ts";
 import { ENV_EXECUTABLE, findChromium, killProfileProcesses, pidsUsingProfile } from "./chromium.ts";
 import { DEFAULT_ALLOW_HOSTS, DEFAULT_REDACT_HEADERS, REDACTED, decide, parseHostRule, redactHeaders, sha256 } from "./policy.ts";
 
@@ -60,8 +61,11 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
 
   const profileDir = mkdtempSync(join(tmpdir(), "rtk-browser-profile-"));
   const sandboxed = !isRoot();
-  const excludeHosts = [...new Set(["localhost", "127.0.0.1", "[::1]", ...rules.map((r) => r.host)])];
-  const resolverRules = ["MAP * ~NOTFOUND", ...excludeHosts.map((h) => `EXCLUDE ${h}`)].join(", ");
+  // Network-layer enforcement that also covers redirect hops (Playwright's route() does NOT see them):
+  // Chromium's only path out is a loopback egress proxy that applies the allowlist to every request.
+  const proxy = new EgressProxy(rules);
+  const proxyPort = await proxy.start();
+  const resolverRules = "MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"; // defence in depth: no local DNS resolution of anything else
 
   const started = Date.now();
   const deadline = started + o.timeoutMs;
@@ -101,7 +105,7 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
       ignoreHTTPSErrors: false,
       locale: "en-US", timezoneId: "UTC",
       viewport: { width: 1280, height: 800 },
-      args: ["--no-proxy-server", `--host-resolver-rules=${resolverRules}`, "--disable-background-networking", "--disable-component-update", "--disable-sync", "--no-first-run", "--no-default-browser-check", "--disable-default-apps", "--disable-features=Translate,OptimizationHints,MediaRouter", "--metrics-recording-only", "--mute-audio"],
+      args: [`--proxy-server=http://127.0.0.1:${proxyPort}`, "--proxy-bypass-list=<-loopback>", `--host-resolver-rules=${resolverRules}`, "--disable-background-networking", "--disable-component-update", "--disable-sync", "--no-first-run", "--no-default-browser-check", "--disable-default-apps", "--disable-features=Translate,OptimizationHints,MediaRouter", "--metrics-recording-only", "--mute-audio"],
     });
     const ctx = context;
     browserVersion = ctx.browser()?.version() ?? null;
@@ -112,19 +116,24 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
       killTimer = setTimeout(() => { killProfileProcesses(profileDir); }, 2000);
     }, o.timeoutMs);
 
+    // every request (including redirect hops, which Playwright never routes) is recorded here with the policy decision
+    ctx.on("request", (r) => {
+      const dec = decide(r.url(), rules);
+      requestCount++;
+      const rec: ReqRec = {
+        id: requestCount, url: shortUrl(r.url()), method: r.method(), resource_type: r.resourceType(), is_navigation: r.isNavigationRequest(),
+        decision: dec.allowed ? "allowed" : "blocked", reason: dec.reason, redirected_from: r.redirectedFrom()?.url() ?? null, status: null,
+        request_headers: redactHeaders(r.headers(), redactSet), response_headers: null, response_bytes: null, failure: null,
+      };
+      reqs.push(rec); byReq.set(r, rec);
+    });
     await ctx.route("**/*", async (route) => {
       const request = route.request();
-      const u = request.url();
-      requestCount++;
-      let dec = decide(u, rules);
-      if (dec.allowed && requestCount > o.maxRequests) { dec = { allowed: false, reason: "max-requests" }; requestsOver = true; }
+      const rec = byReq.get(request);
+      let dec = decide(request.url(), rules);
+      if (dec.allowed && rec && rec.id > o.maxRequests) { dec = { allowed: false, reason: "max-requests" }; requestsOver = true; }
       if (dec.allowed && totalBytes > o.maxBytes) { dec = { allowed: false, reason: "max-bytes" }; bytesOver = true; }
-      const rec: ReqRec = {
-        id: requestCount, url: shortUrl(u), method: request.method(), resource_type: request.resourceType(), is_navigation: request.isNavigationRequest(),
-        decision: dec.allowed ? "allowed" : "blocked", reason: dec.reason, redirected_from: request.redirectedFrom()?.url() ?? null, status: null,
-        request_headers: redactHeaders(request.headers(), redactSet), response_headers: null, response_bytes: null, failure: null,
-      };
-      reqs.push(rec); byReq.set(request, rec);
+      if (rec) { rec.decision = dec.allowed ? "allowed" : "blocked"; rec.reason = dec.reason; rec.request_headers = redactHeaders(request.headers(), redactSet); }
       if (!dec.allowed) { await route.abort("blockedbyclient").catch(() => {}); return; }
       await route.continue().catch(() => {});
     });
@@ -206,11 +215,12 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
     clearTimeout(hardStop);
     await ctx.close().catch(() => {});
   } catch (e) {
-    if (!timedOut) { await context?.close().catch(() => {}); killProfileProcesses(profileDir); rmSync(profileDir, { recursive: true, force: true }); throw e; }
+    if (!timedOut) { await context?.close().catch(() => {}); killProfileProcesses(profileDir); await proxy.stop().catch(() => {}); rmSync(profileDir, { recursive: true, force: true }); throw e; }
   } finally {
     clearTimeout(killTimer);
   }
   // ---- verify cleanup
+  await proxy.stop().catch(() => {});
   await new Promise((r) => setTimeout(r, 50));
   let leftover = pidsUsingProfile(profileDir);
   if (leftover.length) { killProfileProcesses(profileDir); await new Promise((r) => setTimeout(r, 200)); leftover = pidsUsingProfile(profileDir); }
@@ -228,7 +238,7 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
     sandboxed
       ? "Chromium ran with its OS sandbox enabled, but environment.isolation is 'process' only: a hostile page that exploits the browser is not contained by this package. Prefer running the observer inside the @rtk/sandbox runner or a VM."
       : "PROMINENT: running as root forces Chromium --no-sandbox, so the browser's renderer sandbox is OFF. A hostile page can attack the browser process and the host; environment.isolation is honestly 'process' (a disposable profile directory plus request-interception policy, not a security boundary). Run inside the @rtk/sandbox runner or a VM.",
-    "egress control is enforced by request interception (route.abort) plus --host-resolver-rules (non-allowlisted hostnames fail DNS) and --no-proxy-server; it covers HTTP(S) and WebSocket from pages and workers visible to Playwright; other protocols (WebRTC, QUIC to literal IPs, etc.) are not individually verified to be blocked",
+    "egress control is enforced by request interception (route.abort) AND, because Playwright does not route redirect hops, by Chromium --host-resolver-rules (every host:port not allowlisted fails name resolution, IP literals included) and --no-proxy-server; redirect hops are therefore recorded from request events and blocked at the resolver, not by route.abort; it covers HTTP(S) and WebSocket from pages and workers visible to Playwright; other protocols (WebRTC, QUIC to literal IPs, etc.) are not individually verified to be blocked",
     "allowlisted origins ARE contacted: observing a page that talks to an allowlisted host sends that host real requests",
     "passive only: no clicks, form input or navigation beyond the load event + settle window; behaviour gated on user interaction, timing beyond settleMs, or a real (non-headless) fingerprint is not observed",
     "script indicators (eval, Function constructor, atob, ...) are textual matches on script source, not proof of execution; inline scripts are read from the DOM after load",
@@ -255,6 +265,7 @@ export async function observePage(url: string, opts: ObserveOptions = {}): Promi
       navigation: { status: navStatus, error: navError, timed_out: timedOut, subject_is_main_document_body: !!mainBody },
       redirect_chain: redirectChain,
       requests: reqs, blocked_requests: blocked.map((r) => ({ id: r.id, url: r.url, reason: r.reason, resource_type: r.resource_type })),
+      egress: { proxy: "loopback forward proxy (sole network path of the browser)", log: proxy.log, blocked: proxy.log.filter((x) => x.decision === "blocked").length },
       websockets, scripts, console: consoleMsgs, dialogs, popups, downloads, cookies,
       storage: { local_storage_keys: localKeys, session_storage_keys: sessionKeys },
       security_headers: { main_document: { present, missing } },

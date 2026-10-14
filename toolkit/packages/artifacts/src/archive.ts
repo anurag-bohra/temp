@@ -1,6 +1,6 @@
 import { posix } from "node:path";
 import type { Anomaly, AnomalyCode, Quotas, RawEntry } from "./types.ts";
-import { ANOMALY_CODES, FATAL_CODES } from "./types.ts";
+import { ANOMALY_CODES, EntryError, FATAL_CODES, QuotaError } from "./types.ts";
 import type { Source } from "./source.ts";
 import { bufferSource } from "./source.ts";
 import { detectKind, looksLikeTarHeader } from "./kind.ts";
@@ -33,7 +33,13 @@ export async function openContainer(src: Source, budget: Budget, archive: string
     case "tar": return lift(readTar(src, q), "tar", () => {});
     case "asar": return lift(readAsar(src, q), "asar", () => {});
     case "gzip": {
-      const inner = await gunzipSource(src, budget, { toFile: opts.toFile });
+      let inner;
+      try { inner = await gunzipSource(src, budget, { toFile: opts.toFile }); }
+      catch (e) {
+        if (e instanceof QuotaError) return { format: "gzip", entries: [], truncated: true, close() {}, anomalies: [mkAnomaly(e.code, null, e.message, archive, true)] };
+        if (e instanceof EntryError) return { format: "gzip", entries: [], truncated: true, close() {}, anomalies: [mkAnomaly("corrupt-archive", null, e.message, archive)] };
+        throw e;
+      }
       if (!inner) return { format: "gzip", entries: [], truncated: true, close() {}, anomalies: [mkAnomaly("nested-too-large", null, "decompressed gzip stream exceeds the nested-buffer limit", archive)] };
       const ih = inner.source.read(0, 512);
       if (looksLikeTarHeader(ih) || detectKind(ih) === "tar") return lift(readTar(inner.source, q), "tar.gz", () => inner.close());

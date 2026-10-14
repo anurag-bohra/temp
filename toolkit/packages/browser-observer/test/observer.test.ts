@@ -44,13 +44,14 @@ before(async () => {
       case "/popup": return html(r, `<title>p</title><script>window.open('/popped')</script>`);
       case "/popped": return html(r, "<title>popped</title>");
       case "/dl": r.writeHead(200, { "content-type": "application/octet-stream", "content-disposition": 'attachment; filename="evil.bin"' }); return void r.end("BINARY");
-      case "/download": return html(r, `<title>d</title><script>const a=document.createElement('a');a.href='/dl';a.download='evil.bin';document.body.appendChild(a);a.click();</script>`);
+      case "/download": return html(r, `<title>d</title><body><script>const a=document.createElement('a');a.href='/dl';a.download='evil.bin';document.body.appendChild(a);a.click();</script>`);
       case "/allowed": return html(r, `<title>a</title><script>fetch('http://127.0.0.1:${ap}/data').then(r=>r.text()).then(t=>{document.title=t})</script>`);
       case "/console": return html(r, `<title>c</title><script>console.log('hello');console.error('bad thing');throw new Error('uncaught boom')</script>`);
       case "/dialog": return html(r, `<title>dlg</title><script>alert('a1');confirm('c1');prompt('p1','d')</script>`);
       case "/cookie": return html(r, `<title>ck</title><script>localStorage.setItem('ls-key','v');sessionStorage.setItem('ss-key','v')</script>`, { "set-cookie": ["sid=SUPERSECRETCOOKIE; Path=/; HttpOnly", "pref=dark; Path=/"], "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:*", "x-frame-options": "DENY" });
       case "/headers": return html(r, `<title>h</title><script>fetch('http://127.0.0.1:${ap}/data',{headers:{Authorization:'Bearer TOPSECRETTOKEN','X-Custom':'visible-val'}}).catch(()=>{})</script>`, { "set-cookie": "tracker=TRACKSECRET; Path=/" });
       case "/hang": hangSockets.add(q.socket); hits.hang++; return; // never responds
+      case "/busy": return html(r, `<title>busy</title><script>while(true){}</script>`);
       case "/many": return html(r, `<title>m</title>` + Array.from({ length: 12 }, (_, i) => `<script>fetch('http://127.0.0.1:${ap}/n${i}')</script>`).join(""));
       case "/ws": return html(r, "<title>ws</title>");
       default: r.writeHead(404); return void r.end("nf");
@@ -131,6 +132,8 @@ describe("observation (requires Chromium)", { skip }, () => {
     assert.deepEqual(hits.external, []);
     assert.ok(n2.blocked_requests.some((b: any) => b.url.endsWith("/landed")));
     assert.ok(n2.requests.find((r: any) => r.url.endsWith("/landed")).redirected_from.endsWith("/redir-ext"));
+    // Playwright route() never sees redirect hops; the egress proxy is what stops it
+    assert.ok(n2.egress.log.some((x: any) => x.target.endsWith("/landed") && x.decision === "blocked"));
     assert.equal(n2.navigation.status, null);
     assert.ok(n2.navigation.error);
   });
@@ -227,6 +230,16 @@ describe("observation (requires Chromium)", { skip }, () => {
     assert.equal(n.navigation.timed_out, true);
     assert.ok(e.limitations.some((l) => l.includes("hard timeout")));
     assert.equal(n.profile.removed, true); assert.equal(n.profile.leftover_processes, 0);
+    assert.deepEqual(profiles(), before);
+  });
+
+  it("kills a wedged renderer (infinite JS loop) at the hard timeout and cleans up", async () => {
+    const before = profiles();
+    const t0 = Date.now();
+    const e = await observePage(U("/busy"), { allowHosts: MAIN_ONLY(), timeoutMs: 2500 });
+    assert.ok(Date.now() - t0 < 12000);
+    assert.equal(nr(e).navigation.timed_out, true);
+    assert.equal(nr(e).profile.leftover_processes, 0);
     assert.deepEqual(profiles(), before);
   });
 

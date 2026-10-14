@@ -1,0 +1,22 @@
+# @rtk/dotnet-analyzer
+
+Static analysis of .NET (PE/CLI) assemblies WITHOUT loading them. A small C# console helper (`dotnet/MetaReader`, `System.Reflection.Metadata` + `System.Reflection.PortableExecutable`, IL decoded by hand from method-body bytes using an opcode table obtained by reflection over `System.Reflection.Emit.OpCodes`; no `Assembly.Load*`) prints JSON; the TypeScript wrapper turns it into `Evidence` (provider `rtk-dotnet-analyzer`).
+
+```ts
+inspectManagedAssembly(path, { timeoutMs?, cacheDir?, requireManaged? }): Promise<Evidence>   // "inspect_managed_assembly"
+compareManagedAssemblies(evA: Evidence, evB: Evidence): Evidence                              // "compare_managed_assemblies"
+deriveIndicators(edges, pinvokes): Indicator[]   // pure rule table over call edges + P/Invokes
+dotnetAvailable(), ensureHelperBuilt(cacheDir?)  // helper is built once with `dotnet build` into a content-hashed cache dir
+```
+The helper is built with `DOTNET_CLI_TELEMETRY_OPTOUT=1`; offline restore works because it references only the shared framework (cache: `$RTK_DOTNET_CACHE`, else `~/.cache/rtk-dotnet-analyzer`).
+
+## Output (`normalized_result`)
+identity (name, version, MVID, public key token, machine), target framework (from `TargetFrameworkAttribute`), assembly references, module references, types, methods (full name `Ns.Type::Name(System.String,...)`, flags, RVA, IL length, IL sha256, ldstr literals of THAT method), IL call edges (caller -> `Type::Name(sig)`, opcode, target kind, IL offset), whole-assembly `#US` literal list (with tokens), P/Invoke imports (dll, entry point, declaring method), embedded resources (name, size, sha256, kind by magic: pe/zip/gzip/dotnet-resources), custom attribute names, `indicators` (Process::Start, Assembly::Load*, HttpClient/WebClient/Socket, FromBase64String, GetDelegateForFunctionPointer, VirtualAlloc/CreateRemoteThread/WriteProcessMemory P/Invokes, ... each with the evidence method), decode `issues`. A non-managed PE, non-PE, truncated or corrupt file returns Evidence with `managed:false` and a reason (or throws `NotManagedError` with `requireManaged`); partially readable files return `confidence: "derived"` with a `PARTIAL` limitation.
+
+`compareManagedAssemblies` diffs per method by IL hash AND by ldstr literals AND by resolved call edges, plus added/removed methods, P/Invoke, resource, `#US` literal, indicator and assembly-reference diffs. It explicitly reports `literal_changed_il_unchanged` (methods an IL-hash-only comparison, like REA's `compare-managed-members`, calls unchanged) and `il_hash_only_view.hides_literal_changes_in`.
+
+## Verification (`npm test`, 8 tests, 0 skipped when dotnet SDK present)
+Rebuilds the `dn/Stager` sample (Program.cs + csproj) into a temp dir. Asserts: literals `https://c2.example.invalid/stage2`, `cmd.exe`, `/c ` attributed to `Loader::Main`; edge `Main -> System.Diagnostics.Process::Start`; P/Invoke `kernel32.dll!VirtualAlloc` with declaring method `Native::VirtualAlloc`; `FromBase64String` edge from `Decode`; indicators. Cross-check vs REA's real `lab-dn-members.json` on the very binary REA analysed: identical `#US` literals and tokens, identical method set, identical (caller, opcode, target type, target name) call-edge set (REA omits generic arguments in the target type, we keep them; the test strips them), same MVID/sha256. Variant with only `stage2`->`stage9` (same length, IL bytes identical): IL-hash-only comparison reports zero changed methods while `compare()` flags the literal change in `Main`. Variant with an added `CreateRemoteThread` P/Invoke is reported. `demo.exe` (native PE) rejected with "no CLI header"; every 100-byte truncation of the assembly, garbage-after-MZ, empty and text files do not crash; timeout kills the helper. Tests skip when `dotnet` or the sample sources in `/tmp/claude-0/.../scratchpad/samples/dn` are missing.
+
+## Not implemented / limitations
+Only Stager-style single-module assemblies were tested (no signed assemblies, generics-heavy code, mixed-mode, ReadyToRun, resources in satellite/linked files, or obfuscated/encrypted-string assemblies). Method identity ignores return type and generic arity. Calls via delegates/reflection and decrypted strings are invisible. Attribute argument values other than the TFM string are not decoded. Field accesses are not extracted (REA reports them). Indicators are heuristic hints, not verdicts.
