@@ -168,14 +168,14 @@ with `BinaryTargetIdentity = { path; sourcePath?; bundleInfoPlist?; sha256 }` (`
 | **DOS COM** | **Never sniffed.** Only with `format=dos-com`; length must be 1..65 280 bytes | not classified (plain `file`) | `src/domain/dosCom.ts:10-15`; `BinaryTargetResolver.ts:149-174` |
 | **raw-binary** | **Never sniffed.** Only with `format=raw-binary` + `architecture` + `entry_point` | not classified | `src/domain/rawBinary.ts:85-136`; `BinaryTargetResolver.ts:106-148` |
 | **ZIP family** | `PK\x03\x04`, `PK\x05\x06` (empty) or `PK\x07\x08` (split) magic; *then* the **suffix** picks the family: `.zip` zip, `.ipa`, `.apk`, `.msix/.msixbundle`, `.appx/.appxbundle`, `.hap`, `.hsp`; root `.app` ⇒ `app-pack` | same magic; suffix only after magic matched | `src/domain/zipPackageFormat.ts:2-60`; `BinaryTargetResolver.ts:313-319`; `classify.ts:149-198` |
-| **ASAR** | Target admission: **suffix `.asar` alone** (`namedArtifactFormat`). Inventory: header pickle must validate (`hasAsarHeader`) and `.asar` suffix | pickle layout: u32(4), u32 headerSize ≥ 16, u32 payloadSize = headerSize−4, u32 stringLength ≥ 2, byte 16 = `{` | `BinaryTargetResolver.ts:376-383`; `ArtifactGraphConstruction.ts:495-509` |
+| **ASAR** | Target admission: **suffix `.asar` alone** (`namedArtifactFormat`). Inventory: header pickle must validate (`hasAsarHeader`) and `.asar` suffix | pickle layout: u32(4), u32 headerSize ≥ 16, u32 payloadSize = headerSize−4, u32 stringLength ≥ 2 **and ≤ payloadSize−4**, byte 16 = `{` (`hasAsarHeader`, `ArtifactGraphConstruction.ts:500-509`) | `BinaryTargetResolver.ts:376-383`; `ArtifactGraphConstruction.ts:495-509` |
 | **DMG** | suffix `.dmg` **and** `koly` at `size-512` | same (root only) | `BinaryTargetResolver.ts:330-343`; `classify.ts:199-207` |
 | **PKG** | suffix `.pkg` **and** `xar!` magic | same (root hash only) | `BinaryTargetResolver.ts:324-329`; `classify.ts:158-162` |
 | **Plist (binary)** | `bplist00` (8-byte) regardless of extension | same ⇒ `plist` | `src/domain/apple/appleArchiveFormat.ts:10-11` |
 | **Plist (XML)** | bounded streaming prolog scanner (skips comments/PIs, requires `<!DOCTYPE plist` or `<plist`; BOM/UTF-16 aware); probe cap 1 MiB; also suffix `.plist` | same probe | `appleArchiveFormat.ts:7,16-110,215`; `BinaryTargetResolver.ts:344-373` |
 | **NIBArchive** | magic `NIBArchive` (10 bytes), only consumed by IB/keyed-archive readers | n/a | `appleArchiveFormat.ts:2-4,215-216` |
 | **WASM** | `00 61 73 6d 01 00 00 00` ⇒ **refused by `open_binary`** (`wasm_requires_static_inspection`) before any other sniffing | n/a | `BinaryTargetResolver.ts:304-312` |
-| **`.hop`** | suffix `.hop` with no explicit kind (database kind) — checked **after** the WASM probe, so a renamed WASM is still refused | n/a | `BinaryTargetResolver.ts:175-193` |
+| **`.hop`** | suffix `.hop` with no explicit kind (database kind) — checked **after** the WASM probe, so a renamed WASM is still refused; but an explicit `kind=database` **skips** the artifact/WASM probe entirely (RUN: a `.wasm` opened with `targetKind: database` is admitted as `analysis-database`), and a ZIP-magic file named `.hop` becomes `database` (the suffix route returns before the archive classification is used; RUN) | n/a | `BinaryTargetResolver.ts:175-193` |
 | **directory** | `.app` suffix directory ⇒ app bundle resolution; any other directory refused (`directory_requires_file`) for session targets; inventory treats any directory root as `directory` | `entry_kind: directory` | `BinaryTargetResolver.ts:435-451`; `classify.ts:84-93` |
 | **JS / source map** | suffix only: `.js/.mjs/.cjs`, `.map` | path-role hint (`classifyArtifactPath`) | `BinaryTargetResolver.ts:376-383`; `ArtifactGraphConstruction.ts:445-468` |
 
@@ -183,9 +183,9 @@ Notable detection facts:
 
 * **Path suffix is never trusted alone for containers in the inventory.** `createOccurrence` starts a member named like a container
   (`.asar`/`.zip`/…) as `unknown` format until its bytes are read (`ArtifactGraphConstruction.ts:72-125`), and a limitation is
-  recorded if the bytes were never read (`noteUnreadContainerSuffix`, `:127-133`). In contrast, **target admission trusts the `.asar`
+  recorded if the bytes were never read (`noteUnreadContainerSuffix`, `:116-126`). In contrast, **target admission trusts the `.asar`
   suffix** (`namedArtifactFormat`, `BinaryTargetResolver.ts:376-383`); the ASAR header is validated later when the reader opens it
-  (`admitAsarHeader`, `src/artifacts/AsarHeader.ts:10-48`) — a fake `.asar` fails there with reason `format`.
+  (`admitAsarHeader`, `src/artifacts/AsarHeader.ts:10-48`) — extraction of a fake `.asar` fails there with reason `format`, whereas `inspect_artifact` on the same file does **not** fail: the inventory classifier requires a valid header, so the root is recorded as `file` with `node_count: 1` and the limitation "Artifact has no child container entries." (RUN, `fake.asar` = 25 junk bytes).
 * **Plist/ASAR/JS interplay.** `classifyArtifactContent` keeps a path role (`javascript`, `source-map`, `entitlements`) over an
   XML-plist byte match, because XML-ish text can legitimately sit in those files (`ArtifactGraphConstruction.ts:470-498`).
 * **Mach-O header commitments use the full file size**, not the 4 KiB prefix (e.g. `headerSize + commandBytes > fileSize` ⇒
@@ -294,12 +294,12 @@ Each subsection lists: **Detect → Route → Parse → Limits → Output → Fa
 
 **Detect.** Section 2.2. For a *universal* binary the admission step picks **one** host-compatible slice and records its byte
 range: `fatHostArchitecture` maps Node `process.arch` `arm64→arm64`, `x64→x86_64`, `ia32→x86`, `arm→arm`, anything else ⇒ error
-(`src/domain/binaryTarget.ts:163-176`). If the host's architecture is absent the open fails: `FAT binary has no host-compatible <arch> architecture`
+(`src/domain/binaryTarget.ts:163-176`). If the host's architecture is absent the open fails: `FAT binary has no host-compatible <host> architecture` where `<host>` is Node's `process.arch` spelling (RUN: `x64`, `ia32`, `riscv64`)
 (`:150-153`). A slice shorter than its Mach-O header is rejected (`:154-158`). **Implication for triage:** opening an
 `x86_64`-only universal slice on an arm64 host fails at admission; analyse with `inspect_artifact`/`extract_artifact` (macOS) or
 `list_architectures`/`inspect_macho` instead.
 
-FAT table parsing is shared (`src/domain/apple/machoContainer.ts`): `MAX_FAT_ARCHITECTURES = 128` (`:48`); `count > 128` or a table
+FAT table parsing is shared (`src/domain/apple/machoContainer.ts`): `MAX_FAT_ARCHITECTURES = 128` (`:48`); `count === 0` is `malformed`; `count > 128` or a table
 beyond EOF returns `not-fat` (`:76-84`) — *not* an error; `inspectFatSliceRange` rejects slices before the table end, beyond EOF,
 alignment exponent >52, or misaligned offsets (`:210-246`). `classifyFatContainerIdentity` requires either a known Mach-O CPU type
 (`KNOWN_MACHO_CPU_TYPES`, `:49-51`) or an observed Mach-O magic at a slice start — this prevents Java class files (which share
@@ -379,7 +379,7 @@ identity (dev/ino/size/mtime/ctime) re-check before/after, size ≤ `max_file_by
 `src/artifacts/readStableArtifact.ts:44-141`) → `parsePeResources` (`src/native/pe/PeResourceParser.ts:36-300`). The parser walks the
 three-level type/name/language tree, rejecting: cycles, unaligned directories/names (4-/2-byte), name/ID count disagreements,
 duplicate sibling identities, trees deeper/shallower than 3 levels, unbacked/ambiguous RVA mappings, and **non-identical overlapping
-byte ranges** (`rejectOverlappingRanges`, `:302-319`). Budget: 8 MiB of retained result metadata (`METADATA_BYTES`, `:15`),
+byte ranges** (`rejectOverlappingRanges`, `:302-319`). Budget: 8 MiB of retained result metadata (`METADATA_BYTES`, `:20`),
 entry budget `max_entries`; exceeding either ⇒ `limit` failure with **no partial inventory**. Each payload gets its own SHA-256,
 `RT_GROUP_ICON` descriptors are joined to `RT_ICON` candidates by numeric id and language (static relationships only).
 Output fields (`peResourcesSchema`, `peResources.ts:49-111`): `artifact{path,sha256,bytes}`, `format pe32|pe32-plus`, `machine`,
@@ -829,7 +829,7 @@ Fail-closed summary table:
 |---|---|---|---|
 | `../../x` / absolute / drive-letter member name | `normalizeArtifactPath` | **inventory + extraction fail** (`path`) | `ArtifactPaths.ts:24-42` |
 | Backslash traversal (`..\..\x`) on POSIX | backslash is a literal character | one oddly-named file, inside root | `ArtifactPaths.ts:22`; tests `artifactLiteralBackslash.test.ts` |
-| Duplicate names / file-vs-dir clash / case clash | registry + collision limitations + `O_EXCL` | inventory keeps occurrences; extraction **fails** on clash | `ArtifactPaths.ts:45-174`; `SafeOutputTree.ts:203-215` |
+| Duplicate names / file-vs-dir clash / case clash | registry + collision limitations + `O_EXCL` | inventory keeps occurrences; extraction **fails** on exact-path and file-vs-directory clashes, but a case-only clash (`A.txt` vs `a.txt`) fails only when the destination filesystem is case-insensitive (RUN on Linux: both files were extracted, inventory carried the en-US case-fold limitation) | `ArtifactPaths.ts:45-174`; `SafeOutputTree.ts:203-215` |
 | Symlink members | never extracted, never followed; flagged `symlink` | listed, not written | `ZipArtifactReader.ts:261-276`; `DirectoryArtifactReader.ts:295-324`; `ArtifactExtraction.ts:102-105` |
 | Symlinked source root / target | `O_NOFOLLOW`, `lstat`, realpath, `symlinks:"reject"` | open refused | `BinaryTargetResolver.ts:98-101`; `readStableArtifact.ts:49-52` |
 | ZIP bomb | ratio budget + declared size cap + inventory hash pass | `limit` failure | `artifactDecompressionBudget.ts:19-32` |
@@ -907,7 +907,7 @@ sequenceDiagram
 | Condition | Error type / reason | Where |
 |---|---|---|
 | Unreadable/unsupported target header | `BinaryTargetError` constraint `file_format_rejected` | `BinaryTargetResolver.ts:207-213` |
-| Raw/COM selection problems | `BinaryTargetError` constraint `load_selection_rejected` | `:106-148,153-173` |
+| Raw selection problems (and DOS COM selection pairing) | `BinaryTargetError` constraint `load_selection_rejected`; a DOS COM file outside 1..65 280 bytes is `file_format_rejected` (RUN) | `:106-148,153-173` |
 | WASM passed to `open_binary` | `BinaryTargetError` constraint `wasm_requires_static_inspection` ⇒ `target_unavailable/unsupported_target` | `:304-312` |
 | Directory that is not `.app` | `BinaryTargetError` `directory_requires_file` | `:435-451` |
 | Target changed while hashing | `BinaryTargetError` "target changed/grew while being read" | `:400-433` |
@@ -953,6 +953,35 @@ rea trace-dylib-resolution MyApp.app --root Contents/MacOS/MyApp --architecture 
 **Keyed archive / asset catalog examples** (`artifactToolContracts.ts:41-48`): `{"path":"Contents/Resources/Model.plist"}`; `{"offset":0,"limit":1000}`.
 
 **PE resources (docs/binary-diagnostics.md):** `rea inspect-pe-resources ./selected.exe --json`; `{"name":"inspect_pe_resources","arguments":{"path":"/artifacts/selected.exe"}}`; CLI flags `--max-file-bytes`, `--max-entries`.
+
+## 8.1 Lab verification (RUN on Linux x64, `parseBinaryTarget` from `dist/` and the `rea` CLI)
+
+Fixtures were synthesised (thin and fat Mach-O headers, ELF machine patches, ZIP variants, ASAR pickles, `koly` trailer) next to the demo samples. Results confirming section 2.2:
+
+| Input | Result |
+|---|---|
+| ELF x86_64 (`c/t`, `go/beacon`, crash `core`) | `executable elf x86_64` (the core file is admitted as ELF) |
+| ELF with `e_machine` patched to 8 / 20 / 40 / 243 / 0x1234 | `mips` / `powerpc` / `arm` / `riscv` / `unsupported ELF architecture` |
+| PE `pe/demo.exe` / `dn/out/Stager.dll` | `pe x86_64 application managed=false` / `pe x86 application managed=true` |
+| Thin Mach-O x86_64 / arm64 (header only) | `mach-o x86_64` / `mach-o arm64` |
+| Fat Mach-O (x86_64 + arm64) with host x64 / arm64 | `mach-o-universal x86_64` (`universalSlice` offset 4096) / `arm64`; arm64-only fat on x64 host, or host `ia32`/`riscv64`: `file_format_rejected` |
+| Java `.class` (`cafebabe`), SQLite, firmware blob, plain text | `file_format_rejected` (not mistaken for fat Mach-O) |
+| WASM (`m.wasm`, renamed `.hop`) | `wasm_requires_static_inspection` |
+| ZIP magic with suffix `.zip .ipa .apk .msix .msixbundle .appx .hap`, `.exe`, `.app` (file) | `archive` zip / ipa / apk / msix / msix / appx / hap / zip / app-pack |
+| `.asar` (real pickle header / junk) , `.dmg` with `koly` at size-512 / without, `.pkg` with `xar!`, `.js`, `.js.map`, bplist, XML plist (any suffix) | `archive asar` (both: suffix only at admission) / `archive dmg` / `file_format_rejected` / `archive pkg` / `artifact javascript` / `source-map` / `plist` / `plist` |
+| `.hop` | `database analysis-database` |
+| Directory not `.app` / `.app` whose `CFBundleExecutable` is `../../../etc/passwd` / `.app` whose executable symlinks to `/bin/ls` | `directory_requires_file` / `app has an unsafe CFBundleExecutable` / `app program file leaves Contents/MacOS` |
+| Raw: `raw-binary x86_64 0x400000` / ARM entry `0x8001` / 6502 at `0xfffc` / entry `8000` / architecture without `format` | admitted / `must be 4-byte aligned` / `must fit in the 6502 address width` / `must be a hexadecimal address` / `apply only with format=raw-binary` (all `load_selection_rejected`) |
+| DOS COM 65 280 / 65 281 bytes | admitted / `file_format_rejected` |
+| `inspect-artifact` on ZIP with `../../evil.txt` / `/etc/evil` | `artifact_operation_failed`, reason `path` (whole inventory fails) |
+| ZIP member named `..\..\x` | inventoried and extracted as a literal file name inside the root |
+| ZIP symlink member + `0755` member | symlink listed (`not-hashed`, "target was not read") and not extracted; `run.sh` flagged `executable: true` but extracted mode `0600` |
+| ZIP of 600 MiB zeros (611 640 bytes) | `limit` / `truncated`: "declare 629145600 uncompressed bytes, exceeding this archive's 305820000-byte" budget (500 x archive size) |
+| Nested ZIP | inner archive stays one `zip` file occurrence |
+| `extract-artifact` | output `/tmp/rea-extracted-<uuid>`, mode `0700`, files `0600`, `containment_verified: true`, tree kept; DMG: `unsupported_target` "no extraction reader: dmg" |
+| `inspect-pe-resources demo.exe` | `pe32-plus`, coverage `complete`, 6 entries examined, 2 resources (`RCDATA/PAYLOAD`, `RT_GROUP_ICON`); `--max-file-bytes 100` -> `resource_constraint`; an ELF input -> `invalid_request` |
+| `trace-dylib-resolution My.app` (synthetic) | runs on Linux, coverage `complete`, 8 fixed limitations |
+| `inspect-macho`, `inspect-asset-catalog` | `capability_unavailable` on Linux |
 
 ---
 
