@@ -10,7 +10,7 @@ export function looksLikeTarHeader(b: Buffer): boolean {
 function looksLikeAsar(b: Buffer): boolean {
   if (b.length < 20 || b.readUInt32LE(0) !== 4) return false;
   const hp = b.readUInt32LE(4), inner = b.readUInt32LE(8), jl = b.readUInt32LE(12);
-  return hp >= 8 && inner + 4 <= hp + 0 && jl <= inner && (b[16] === 0x7b);
+  return hp === inner + 4 && jl <= inner - 4 && jl + 3 >= inner - 4 && b[16] === 0x7b;
 }
 /** Classify by magic bytes (never by extension). `head` should be the first >= 512 bytes (more is fine). */
 export function detectKind(head: Buffer): Kind {
