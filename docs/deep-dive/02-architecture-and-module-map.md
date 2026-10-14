@@ -655,7 +655,7 @@ export const mcpResponseBudgetSchema = z
 | `REA_GDB_COMMAND` | `gdb` | `src/gdb/GdbSessionManager.ts:349` | GDB executable for `start_gdb_session` |
 | `REA_RIZIN_COMMAND` | `rizin` | `src/composition/reverseEngineering.ts:30`; `src/rizin/RizinDebugSessionManager.ts:271` | rizin executable |
 | `REA_OBJDUMP_COMMAND` | `objdump` | `src/composition/reverseEngineering.ts:20` | objdump executable |
-| `REA_CUTTER_BRIDGE_DIR` | platform default derived in `CutterBridgeClient` (also uses `LOCALAPPDATA` on Windows) | `src/cutter/CutterBridgeClient.ts:254-255` | Directory where the Cutter plugin publishes sessions |
+| `REA_CUTTER_BRIDGE_DIR` | `~/.cache/rea/cutter-bridge`; on Windows with `LOCALAPPDATA` set, `%LOCALAPPDATA%\REA\CutterBridge` (`src/cutter/CutterBridgeClient.ts:281-285`) | `src/cutter/CutterBridgeClient.ts:254-255` | Directory where the Cutter plugin publishes sessions |
 | `REA_TSHARK_COMMAND` | unset (must be absolute; Linux only) | `src/captures/TsharkCaptureProvider.ts:139`; `src/pcap/PcapConfiguration.ts:10` | tshark 4.x |
 | `REA_CAPINFOS_COMMAND` | unset | `src/pcap/PcapConfiguration.ts:11` | capinfos |
 | `REA_TSHARK_PRLIMIT_COMMAND` | `/usr/bin/prlimit` | `src/captures/TsharkCaptureProvider.ts:150`; `src/pcap/PcapNativeBound.ts:9` | util-linux prlimit used to bound tshark |
@@ -733,6 +733,35 @@ Walkthrough with citations:
 6. **Server factory, not a single server** (`src/main/transport.ts:84-116`). `serveStdio(factory, {onerror})` may invoke the factory more than once: the SDK can construct a *probe* instance, then discard it and construct a replacement (see `node_modules/@modelcontextprotocol/server/dist/stdio.mjs:131-146`: one instance is pinned for the connection lifetime after the opening exchange picks the protocol era; a probe may be discarded). Therefore every invocation creates a **new** Android (JADX) provider (`createAndroidAnalysisProvider`, `:87-89`) and a new `createServer({kind:"session", session}, {...})`; all instances share the same `BinarySession`, the same logger, the same delivery policy and the same optional providers. Each server is added to a `Set` and removed on its own `close()` (`:102-107`), so a discarded probe's provider resources are still closed at shutdown.
 7. **Start failure cleanup** (`:117-162`): `Promise.allSettled` of `session.close()`, android close, server close, optional provider close; each rejection and the binary-cleanup error projection is logged and written to stderr; returns `{ok:false}` and `run` returns exit 1.
 8. **Shutdown** (`src/main/shutdown.ts:16-92`): an ordered array of cleanup owners (transport handle, android providers, optional providers, session). `shutdown()` is memoised in `shutdownAttempt` and **retryable on failure** (reset in the `.catch`, `:71-74`); owners that already closed are not re-run (`closed` flags, `:29-44`, `:49-56`). Closing runs in parallel with `Promise.allSettled`; one failure rethrows it, several are wrapped in `AggregateError("Multiple MCP cleanup operations failed")`. The session is closed with `retainProviderDocuments: true` (`:39`), i.e. REA closes its bridge resources "without assuming ownership of the Hopper app" (`src/main.ts:45-49`). A failed shutdown sets exit code 1 and prints `MCP_SHUTDOWN_FAILED` ("REA could not close cleanly. End the REA process before starting it again.") plus the projected `AnalysisError` message (`:77-89`). Signal handlers are `process.once` for SIGINT/SIGTERM and `stdin` `end`/`close` (`src/main.ts:32-44`).
+
+### Figure 8.2 — Process lifetime as a sequence (client, REA, engines)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Host as MCP client (agent host)
+  participant Rea as rea mcp process
+  participant Ses as BinarySession
+  participant Eng as Engine child processes
+  Host->>Rea: spawn with stdio and environment block
+  Rea->>Rea: parseConfig, create empty session, load optional providers
+  Rea-->>Host: ready (no output until first request)
+  Host->>Rea: initialize then tools/call open_binary
+  Rea->>Ses: open target (provider selected, no engine started yet)
+  Host->>Rea: tools/call binary_overview
+  Rea->>Ses: execute
+  Ses->>Eng: lazy start owned provider process (run id token)
+  Eng-->>Ses: observations
+  Ses-->>Rea: Evidence
+  Rea-->>Host: result
+  Host--xRea: stdin end or SIGTERM
+  Rea->>Rea: requestShutdown (idempotent, retryable)
+  Rea->>Ses: close with retainProviderDocuments
+  Ses->>Eng: owned cleanup of process group
+  Rea-->>Host: exit code 0, or 1 with MCP_SHUTDOWN_FAILED
+```
+
+*Caption: the process lifetime from the agent's point of view. For Ghidra the engine starts at the first provider-backed query, not at `open_binary` (`docs/mcp-contracts.md`, "Ghidra first-query deadlines and recovery"); when each other provider starts its engine is covered in chapters 06 to 09 (step 8 is therefore illustrative for Ghidra).*
 
 ### Messages (verbatim)
 
