@@ -1,0 +1,5 @@
+[{"tool":"start_frida_session","args":{"device_id":"local","mode":"spawn","program":"/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/vuln/hard","argv":["/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/vuln/hard","hello"]}},
+ {"tool":"load_frida_script","args":{"session_id":"${session_id}","source_kind":"inline","source":"for (const n of ['write','__printf_chk','puts','exit']) { const f = Module.getGlobalExportByName(n); Interceptor.attach(f,{onEnter(a){ send({call:n, a0:a[0].toString(), s: (n==='write')? a[1].readUtf8String(a[2].toInt32()) : (n==='__printf_chk'? a[1].readUtf8String():null)}); }}); } send('hooked4');"}},
+ {"tool":"resume_frida_session","args":{"session_id":"${session_id}"},"sleep_ms":2000},
+ {"tool":"frida_session_status","args":{"session_id":"${session_id}"}},
+ {"tool":"close_frida_session","args":{"session_id":"${session_id}"}}]

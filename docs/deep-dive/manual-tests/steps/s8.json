@@ -1,0 +1,5 @@
+[{"tool":"start_frida_session","args":{"device_id":"local","mode":"spawn","program":"/usr/bin/touch","argv":["/usr/bin/touch","/tmp/frida-ran"]}},
+ {"tool":"load_frida_script","args":{"session_id":"${session_id}","source_kind":"inline","source":"const f=Module.getGlobalExportByName('openat'); Interceptor.attach(f,{onEnter(a){ send({openat:a[1].readUtf8String()}); }}); send('hooked-openat');"}},
+ {"tool":"resume_frida_session","args":{"session_id":"${session_id}"},"sleep_ms":1500},
+ {"tool":"frida_session_status","args":{"session_id":"${session_id}"}},
+ {"tool":"close_frida_session","args":{"session_id":"${session_id}"}}]

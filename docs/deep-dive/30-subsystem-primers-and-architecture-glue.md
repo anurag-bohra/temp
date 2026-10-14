@@ -1,4 +1,6 @@
-# 30 — Subsystem primers and architecture glue (short, to keep the flows and architecture understandable)
+# 30 — Subsystem primers and architecture glue (short)
+
+> **Status update:** the deep chapters this file stood in for now exist — [09](09-other-native-providers.md), [15](15-filetypes-managed-firmware-wasm-evm-misc.md), [18](18-process-capture-and-instrumentation.md), [19](19-android-mobile.md), [20](20-network-and-signal-captures.md), [21](21-security-model.md), [22](22-end-to-end-workflows.md). Prefer them; this chapter keeps only the architecture-glue diagrams. Where the primers below disagree with the deep chapters (e.g. browser sandbox), the deep chapters win.
 
 These are deliberately brief stand-ins for the chapters not written in depth (former plan: 09 other native providers, 15 managed/firmware/WASM/EVM formats, 18 process capture and Frida, 19 Android, 20 network/signal captures, 21 security model, 22 end-to-end). Each primer says only what is needed to follow [26](26-tool-usage-in-context-malware-analyst-view.md), [28](28-vulnerability-research-with-rea.md), [02](02-architecture-and-module-map.md) and [03](03-mcp-server-runtime-and-contracts.md). Sources: REA README, `docs/*.md`, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md` and the tool catalog; I did not read the code of these subsystems line by line (see [29](29-pending-and-status.md)).
 

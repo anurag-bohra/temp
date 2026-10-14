@@ -255,7 +255,7 @@ export interface AnalysisProvider {
 }
 ```
 
-Note: the **provider-level** effect vocabulary (`mutatesArtifact`, `launchesProcess`, `mayShowUi`, `mayAccessNetwork`, `mayWriteFilesystem`, `changesPermissions`, `requiresRoot`) is different from the **tool-level** `ToolEffects` vocabulary (`mutatesTarget`, `mutatesSession`, `writesFilesystem`, `launchesProcess`, `accessesNetwork`, `changesUiState`, `mayDiscardData`, `executesForeignCode`, `mutatesDevice`, `idempotent`; `src/contracts/toolEffects.ts`). The provider vocabulary has no "executes foreign code" bit because no `AnalysisProvider` executes the target; the tool vocabulary has it for the target-free services that do. `mutatesSession` is true for **every** tool because recording Evidence counts ("Includes additive Evidence recording, navigation state, and unknown updates", `toolEffects.ts` doc comment), which is why every tool's MCP `readOnlyHint` is false.
+Note: the **provider-level** effect vocabulary (`mutatesArtifact`, `launchesProcess`, `mayShowUi`, `mayAccessNetwork`, `mayWriteFilesystem`, `changesPermissions`, `requiresRoot`) is different from the **tool-level** `ToolEffects` vocabulary (`mutatesTarget`, `mutatesSession`, `writesFilesystem`, `launchesProcess`, `accessesNetwork`, `changesUiState`, `mayDiscardData`, `executesForeignCode`, `mutatesDevice`, `idempotent`; `src/contracts/toolEffects.ts`). The provider vocabulary has no "executes foreign code" bit because no `AnalysisProvider` executes the target; the tool vocabulary has it for the target-free services that do. `mutatesSession` is true for almost every tool because recording Evidence counts ("Includes additive Evidence recording, navigation state, and unknown updates", `toolEffects.ts` doc comment), which is why nearly every tool's MCP `readOnlyHint` is false. **Corrected after verification:** it is not *every* tool. In `.cache/mcp-tool-catalog.json` 196 of 207 tools have `mutatesSession: true`; the 11 with `false` are `evaluate_reconstruction_coverage`, `binary_session`, `export_evidence_bundle`, `list_unknowns`, `verify_unknown_resolution`, `get_evidence_bundle`, `list_cutter_sessions`, `gdb_session_status`, `list_frida_devices`, `list_frida_processes`, `frida_session_status`, and six of them carry `readOnlyHint: true` (`evaluate_reconstruction_coverage`, `list_unknowns`, `verify_unknown_resolution`, `get_evidence_bundle`, `gdb_session_status`, `frida_session_status`).
 
 ### 2.4 Candidate contract used by the registry (`AnalysisProvider.ts:243-293`)
 
@@ -584,7 +584,7 @@ Walkthrough (`#openWithinTransition`, lines 261-371): `resolveSessionOpen` parse
 
 Note: the official/enhanced tool handlers ALSO create Evidence (`registerOfficialTools.ts:78-98`). The `BinarySession`-level Evidence recording is for the **snapshot cache** (so a later `open_binary` with a snapshot can replay); the tool handler's Evidence is the one returned to the agent. See chapter 10 for how Evidence relates to the ledger.
 
-### 5.5 Snapshot cacheability rule (`AnalysisSnapshotCache.ts:67-77`, verbatim)
+### 5.5 Snapshot cacheability rule (`AnalysisSnapshotCache.ts:70-85`, verbatim; the draft cited 67-77)
 
 ```ts
 /** Whether an operation is immutable and independent of provider UI state. */
@@ -623,7 +623,7 @@ export const isSnapshotCacheable = (
 
 `binary_session` (MCP) "Report[s] the complete current target, provider, capability availability, client-feature, analysis, and server-identity status without starting analysis."
 
-Flow (`src/server/registerSessionStatusTool.ts:60-145`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
+Flow (`src/server/registerSessionStatusTool.ts:42-130`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
 
 ```ts
 const projectSessionStatus = (options: {...}) =>
@@ -635,9 +635,9 @@ const projectSessionStatus = (options: {...}) =>
   });
 ```
 
-(`registerSessionStatusTool.ts:~135-150`.)
+(`registerSessionStatusTool.ts:132-`; line cites corrected after verification.)
 
-### 6.1 `session.status()` projection (`BinarySessionStatus.ts:42-110`)
+### 6.1 `session.status()` projection (`BinarySessionStatus.ts:36-109`)
 
 Shape (derived from the code and the `sessionProvider` schema, `src/contracts/toolOutputSchemaPrimitives.ts:464-490`):
 
@@ -654,7 +654,7 @@ Shape (derived from the code and the `sessionProvider` schema, `src/contracts/to
 }
 ```
 
-(Constructed from the schema and projection code; the target summary fields come from `binaryTargetSummary`.) `providerCapabilitySets` (lines 188-244) **groups** operations of one provider that share `(effects, limitations-after-common-prefix, availability, reason, availability_code)` to keep the payload small; `commonLimitationsPrefix` factors the shared prefix into `shared_limitations`. The projection **omits the internal `inventory_artifact` operation** from capability lists. Runtime-unavailable operations are overlaid (`available: false, reason: "<tag>: <message>"`).
+(Constructed from the schema and projection code; the target summary fields come from `binaryTargetSummary`.) `providerCapabilitySets` (lines 213-281) **groups** operations of one provider that share `(effects, limitations-after-common-prefix, availability, reason, availability_code)` to keep the payload small; `commonLimitationsPrefix` factors the shared prefix into `shared_limitations`. The projection **omits the internal `inventory_artifact` operation** from capability lists. Runtime-unavailable operations are overlaid (`available: false, reason: "<tag>: <message>"`).
 
 ### 6.2 `buildCapabilityInventory` (`src/application/CapabilityInventory.ts`, 827 lines)
 
@@ -671,7 +671,7 @@ export const toolUnavailabilityReason = z.enum([
 ]);
 ```
 
-Decision procedure `availabilityFor` (lines ~273-300), in order:
+Decision procedure `availabilityFor` (lines 290-314), in order:
 
 1. two always-available browser observation workflows; `get_navigation_context` has its own two-mode logic (`current_selection` needs `current_document, current_address, resolve_containing_procedure`; `explicit_document` needs `current_address, resolve_containing_procedure`);
 2. `analyze_javascript_application` / `reconcile_javascript_runtime` always available;
@@ -681,7 +681,7 @@ Decision procedure `availabilityFor` (lines ~273-300), in order:
 6. **target availability**: active-target kinds (`official-proxy`, `enhanced`, `native-provider`, `artifact-provider`) -> `target_required` when nothing is open; non-executable/database targets for official/enhanced -> `target_unsupported`; Mach-O-only operations (`inspect_signature`, `inspect_macho`, `list_architectures`, `observe_native_calls`, `observe_native_ui`, `capture_native_ui_scenario`) need a Mach-O executable;
 7. **provider availability** (`providerAvailability`): enhanced tools by composition; other tools by their descriptor (`provider_missing` if no provider declares the operation; `provider_unavailable` with the descriptor reason otherwise).
 
-**Enhanced tool composition** (`ENHANCED_REQUIREMENTS`, lines 105-135, verbatim) - an enhanced tool is available iff the bound provider set declares and makes available each required operation:
+**Enhanced tool composition** (`ENHANCED_REQUIREMENTS`, lines 103-132, verbatim) - an enhanced tool is available iff the bound provider set declares and makes available each required operation:
 
 ```ts
 const ENHANCED_REQUIREMENTS: Readonly<
@@ -849,7 +849,7 @@ The catalog's `version` is the catalog identity version (`null` means resolved a
 Notes on the table:
 
 - **The tool counts** are the catalog's `capabilities[]` lengths. Providers that share a tool family (`har-schema/lossless-json`, `fiddler-saz`, `mitmproxy-native-tnetstring` all serve `inspect_web_network_capture`; `binwalk` and `unblob` split the firmware tools) are separate identities for the same tool contract; the Evidence's provider identity depends on the carrier format selected.
-- `rea-javascript-application-workflows` is the only provider with a read-only-annotated tool (1 of 8); all others report `readOnlyHint: false` because of `mutatesSession` (Evidence recording).
+- Corrected after verification: three providers carry a `readOnlyHint: true` tool, not one: `rea-javascript-application-workflows` (`evaluate_reconstruction_coverage`, 1 of 8), `gnu.gdb` (`gdb_session_status`) and `frida` (`frida_session_status`); the session-kind tools `list_unknowns`, `verify_unknown_resolution` and `get_evidence_bundle` are read-only too but belong to no provider. All other provider tools report `readOnlyHint: false` because of `mutatesSession` (Evidence recording).
 - Provider IDs are the strings that appear in Evidence `provider.id`, in the analysis profile's provider, and in `binary_session.capabilities[].provider.id`. Deep-provider IDs (`hopper`, `ghidra`, `ida`) are the only valid `provider_id` selector values (besides `auto`).
 - Environment variables are those the code actually reads (`grep` of `src/`); no flags beyond those found in code are listed. `REA_ANALYSIS_PROVIDER` (default `auto`) and `REA_LOG_LEVEL` are global.
 
@@ -861,7 +861,7 @@ Notes on the table:
 | `REA_IDA_MCP_CONFIG` | unset | absolute path to IDA MCP registration | `environment.ts:28-32` |
 | `HOPPER_*`, `GHIDRA_*`, `REA_GHIDRA_*`, `JAVA_HOME` | see ch. 07/08 | engine configuration | `environment.ts:33-73` |
 | `REA_MCP_MAX_RESPONSE_BYTES`, `REA_MCP_INPUT_SCHEMA_PROFILE`, `REA_MCP_OUTPUT_SCHEMA_PROFILE` | unset | MCP delivery tuning (ch. 03) | `environment.ts:25-27` |
-| `REA_LOG_LEVEL` | `info` | pino level | `environment.ts:74-76` |
+| `REA_LOG_LEVEL` | `info` (server schema default; the one-shot CLI uses `silent` when the variable is unset, `src/cli.ts:80-87`) | pino level | `environment.ts:74-76` |
 | `REA_REFERENCE_SECRET_PATTERNS_JSON` | `[]` | secret-redaction patterns for reference sources | `environment.ts:77` |
 
 ---

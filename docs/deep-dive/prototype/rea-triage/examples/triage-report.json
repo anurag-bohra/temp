@@ -1,0 +1,239 @@
+{
+ "generated_from": [
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/js.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/go.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/od.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/dn-members.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/dn-native.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/apk-pkg.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/pe.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/pcap.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/out/bl-weak.json",
+  "/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/mcp/t2.json"
+ ],
+ "evidence_records": 19,
+ "findings": [
+  {
+   "rule_id": "R-NET-001",
+   "title": "Hard-coded network endpoint in code or data",
+   "tag": "command-and-control",
+   "severity": "medium",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_a5c759608ccc88c6c2b5eb8748727cd5c9df7419ee4765cc7cd49871ad9dc001",
+    "ev_6a34563b3db836be79fe6da61a0cbcfefcec1ed4097f25738559869fc8e54dd4",
+    "ev_0e6c0f04b60108f50f2af31483d2bc2202fa44618e6a6d77cc751e6a36ccb40f",
+    "ev_bdb695097a05f21871deb44f44ffe9e174961c93d35b9e5167966012fcf86a75"
+   ],
+   "detail": [
+    "https://c2.example.invalid/task",
+    "https://c2.example.invalid/stage2",
+    "http://127.0.0.1:8765/beacon?id=42&host=lab",
+    "http://127.0.0.1:8765/task",
+    "198.51.100.7"
+   ]
+  },
+  {
+   "rule_id": "R-MEM-001",
+   "title": "Executable memory allocation (loader/shellcode pattern)",
+   "tag": "defense-evasion",
+   "severity": "high",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_6a34563b3db836be79fe6da61a0cbcfefcec1ed4097f25738559869fc8e54dd4",
+    "ev_a91cc1abfa4a3790bf48768c1361704a786f87837c5c3853637444d7376745dc"
+   ],
+   "detail": [
+    "VirtualAlloc"
+   ]
+  },
+  {
+   "rule_id": "R-ANTI-001",
+   "title": "Anti-debugging API",
+   "tag": "defense-evasion",
+   "severity": "medium",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_00c00adeed056c36a07a810bda97d4dc676eec95f87440df9341af6b91baa08a"
+   ],
+   "detail": [
+    "ptrace"
+   ]
+  },
+  {
+   "rule_id": "R-NET-002",
+   "title": "Socket / outbound connection API",
+   "tag": "command-and-control",
+   "severity": "medium",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_00c00adeed056c36a07a810bda97d4dc676eec95f87440df9341af6b91baa08a",
+    "ev_6a34563b3db836be79fe6da61a0cbcfefcec1ed4097f25738559869fc8e54dd4"
+   ],
+   "detail": [
+    "connect",
+    "socket",
+    "inet_pton",
+    "GetStringAsync"
+   ]
+  },
+  {
+   "rule_id": "R-FD-001",
+   "title": "File descriptor redirection to socket (reverse-shell pattern)",
+   "tag": "execution",
+   "severity": "high",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_00c00adeed056c36a07a810bda97d4dc676eec95f87440df9341af6b91baa08a"
+   ],
+   "detail": [
+    "dup2",
+    "connect"
+   ]
+  },
+  {
+   "rule_id": "R-OBF-001",
+   "title": "Base64 decode of configuration or payload",
+   "tag": "obfuscation",
+   "severity": "low",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_6a34563b3db836be79fe6da61a0cbcfefcec1ed4097f25738559869fc8e54dd4"
+   ],
+   "detail": [
+    "FromBase64String"
+   ]
+  },
+  {
+   "rule_id": "R-MOB-001",
+   "title": "Premium SMS / SMS access permission",
+   "tag": "mobile-collection",
+   "severity": "high",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_f25d0b896198437b9fd6c619757e681711bed74a2699c9ed11980e193a11c3b8"
+   ],
+   "detail": [
+    "android.permission.SEND_SMS",
+    "android.permission.READ_SMS"
+   ]
+  },
+  {
+   "rule_id": "R-JS-001",
+   "title": "Renderer-to-main command execution bridge (Electron)",
+   "tag": "privilege-escalation",
+   "severity": "high",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_a5c759608ccc88c6c2b5eb8748727cd5c9df7419ee4765cc7cd49871ad9dc001"
+   ],
+   "detail": [
+    "ipc-handler",
+    "child-process",
+    "context-bridge-api"
+   ]
+  },
+  {
+   "rule_id": "R-JS-002",
+   "title": "Dynamic code evaluation of network-derived data (candidate)",
+   "tag": "execution",
+   "severity": "high",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [
+    "ev_a5c759608ccc88c6c2b5eb8748727cd5c9df7419ee4765cc7cd49871ad9dc001"
+   ],
+   "detail": [
+    "request",
+    "eval-expression"
+   ]
+  },
+  {
+   "rule_id": "R-PE-001",
+   "title": "Embedded payload-like PE resource (RCDATA, non-icon)",
+   "tag": "payload-staging",
+   "severity": "medium",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [],
+   "detail": [
+    "RCDATA resource present"
+   ]
+  },
+  {
+   "rule_id": "R-HARD-001",
+   "title": "Weak binary hardening (no canary and executable stack)",
+   "tag": "vuln-surface",
+   "severity": "info",
+   "basis": "static-evidence-match (not a verdict)",
+   "evidence_ids": [],
+   "detail": [
+    "no canary + executable stack indicator"
+   ]
+  }
+ ],
+ "iocs": [
+  {
+   "kind": "base64-decoded",
+   "value": "https://c2.example.invalid/task",
+   "evidence_ids": [
+    "ev_a5c759608ccc88c6c2b5eb8748727cd5c9df7419ee4765cc7cd49871ad9dc001"
+   ],
+   "context": "js literal src/config.js (decoded)"
+  },
+  {
+   "kind": "url",
+   "value": "https://c2.example.invalid/task",
+   "evidence_ids": [
+    "ev_a5c759608ccc88c6c2b5eb8748727cd5c9df7419ee4765cc7cd49871ad9dc001"
+   ],
+   "context": "js literal src/config.js (decoded)"
+  },
+  {
+   "kind": "toolchain",
+   "value": "go go1.24.7 module beacon",
+   "evidence_ids": [
+    "ev_e23f9b96c0514e8765dff50b785d7c342b3f76e41e1c361f34d93197fee35b03"
+   ],
+   "context": "Go build info"
+  },
+  {
+   "kind": "url",
+   "value": "https://c2.example.invalid/stage2",
+   "evidence_ids": [
+    "ev_6a34563b3db836be79fe6da61a0cbcfefcec1ed4097f25738559869fc8e54dd4"
+   ],
+   "context": ".NET ldstr"
+  },
+  {
+   "kind": "embedded-resource",
+   "value": "RCDATA PAYLOAD sha256=7694ba85520e09b810ef713d536ca9d60476967246edc9fa0eee090f0bbdb4f1 bytes=33",
+   "evidence_ids": [
+    "ev_245439d4a05c6ad2e21a6144b1a0e2caec776df8832eee0a1c75c1f10d5dc760"
+   ],
+   "context": "PE resource"
+  },
+  {
+   "kind": "url",
+   "value": "http://127.0.0.1:8765/beacon?id=42&host=lab",
+   "evidence_ids": [
+    "ev_0e6c0f04b60108f50f2af31483d2bc2202fa44618e6a6d77cc751e6a36ccb40f"
+   ],
+   "context": "pcap http"
+  },
+  {
+   "kind": "url",
+   "value": "http://127.0.0.1:8765/task",
+   "evidence_ids": [
+    "ev_0e6c0f04b60108f50f2af31483d2bc2202fa44618e6a6d77cc751e6a36ccb40f"
+   ],
+   "context": "pcap http"
+  },
+  {
+   "kind": "ipv4",
+   "value": "198.51.100.7",
+   "evidence_ids": [
+    "ev_bdb695097a05f21871deb44f44ffe9e174961c93d35b9e5167966012fcf86a75"
+   ],
+   "context": "native string @0x102004"
+  }
+ ]
+}

@@ -724,7 +724,7 @@ export const toolUnavailabilityReason = z.enum([
 ### 11.1 `ToolEffects` (verbatim)
 
 ```ts
-// src/contracts/toolEffects.ts:1-30
+// src/contracts/toolEffects.ts:1-31
 /** Possible effects across a tool's supported inputs, including temporary work. */
 export interface ToolEffects {
   readonly mutatesTarget: boolean;
@@ -762,7 +762,7 @@ Defaults and shorthand constants (`:32-52`): every flag `false` except `idempote
 ### 11.2 Derivation of MCP annotations (verbatim)
 
 ```ts
-// src/contracts/toolEffects.ts:714-737
+// src/contracts/toolEffects.ts:713-737
 /** Derive MCP annotations without tool-name or tool-family heuristics. */
 export const annotationsFromEffects = (
   value: ToolEffects,

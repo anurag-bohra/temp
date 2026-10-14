@@ -165,7 +165,7 @@ export const GHIDRA_MUTATING_OPERATIONS: ReadonlySet<string> = new Set([
 
 ### 2.2 Read-only adapter operations (complete list) with inputs
 
-Input schemas are validated in Node *before* crossing the socket (`parseGhidraInventoryInput` / `parseGhidraFunctionInput`). Shared field shapes: `document` is `string|null` (default null, must equal the single Program name); an address is `0x`-hex or `<encoded-space>:0x<hex>` (regex in `GhidraInventoryValues.ts:65-70`).
+Input schemas are validated in Node *before* crossing the socket (`parseGhidraInventoryInput` / `parseGhidraFunctionInput`). Shared field shapes: `document` is `string|null` (default null, must equal the single Program name); an address is hex digits with an **optional** `0x` prefix (bare hex such as `101229` is accepted by the schema), or `<percent-encoded-space>:0x<hex>` (regex in `GhidraInventoryValues.ts:65-70`).
 
 | Operation | Inputs (zod, strict) | What it returns / notes | Class |
 |---|---|---|---|
@@ -223,7 +223,7 @@ export const nativeFunctionAnnotationsInputSchema = z
   );
 ```
 
-Of the 41 official-proxy tools, Ghidra implements 29 (`address_name`, `address_to_file_offset`, `annotate_native_function`, `inspect_native_data_type`, `inspect_native_instruction`, `inspect_native_load_image`, `list_documents`, `list_names`, `list_procedures`, `list_segments`, `list_strings`, `procedure_address`, `procedure_assembly`, `procedure_callees`, `procedure_callers`, `procedure_info`, `procedure_pseudo_code`, `procedure_references`, `read_bytes`, `read_function_instructions`, `resolve_containing_procedure`, `resolve_native_call_targets`, `search_bytes`, `search_procedures`, `search_strings`, `set_address_name`, `set_addresses_names`, `xrefs`, plus the enhanced `analyze_function`). Hopper-only (GUI-state/bookmark/comment) tools are `comment`, `inline_comment`, `current_*`, `goto_address`, `list_bookmarks`, `next_address`, `prev_address`, `set_bookmark`, `unset_bookmark`, `set_comment`, `set_inline_comment`. See the matrix in `07-hopper-provider.md` section 2.2.
+Of the 41 official-proxy tools, Ghidra implements 28 (verified by loading the `dist/` operation lists; `analyze_function` is the 29th Ghidra operation but is not an official-proxy tool): `address_name`, `address_to_file_offset`, `annotate_native_function`, `inspect_native_data_type`, `inspect_native_instruction`, `inspect_native_load_image`, `list_documents`, `list_names`, `list_procedures`, `list_segments`, `list_strings`, `procedure_address`, `procedure_assembly`, `procedure_callees`, `procedure_callers`, `procedure_info`, `procedure_pseudo_code`, `procedure_references`, `read_bytes`, `read_function_instructions`, `resolve_containing_procedure`, `resolve_native_call_targets`, `search_bytes`, `search_procedures`, `search_strings`, `set_address_name`, `set_addresses_names`, `xrefs`). Hopper-only (GUI-state/bookmark/comment) tools are `comment`, `inline_comment`, `current_*`, `goto_address`, `list_bookmarks`, `next_address`, `prev_address`, `set_bookmark`, `unset_bookmark`, `set_comment`, `set_inline_comment`. See the matrix in `07-hopper-provider.md` section 2.2.
 
 ### 2.3 Capability descriptor generation (verbatim)
 
@@ -408,7 +408,7 @@ const responseSchema = z.discriminatedUnion("ok", [
 ]);
 ```
 
-Differences from Hopper's wire: Ghidra replies use `{"id","ok":true,"result"}` / `{"id","ok":false,"error":{"code","message"}}` and carry **no progress events** (progress is generated Node-side as a 10 s "Waiting for Ghidra startup" heartbeat during startup, `GhidraClient.ts:235-262`). Error codes seen in the bridge include `invalid_request`, `not_found`, `analysis_incomplete`, `method_unavailable` (Windows mutators), `bridge_exception`, `decompile_cancelled`.
+Differences from Hopper's wire: Ghidra replies use `{"id","ok":true,"result"}` / `{"id","ok":false,"error":{"code","message"}}` and carry **no progress events** (progress is generated Node-side as a 10 s "Waiting for Ghidra startup" heartbeat during startup, `GhidraClient.ts:235-262`). Error codes seen in the bridge include `invalid_request`, `not_found`, `analysis_incomplete`, `method_unavailable` (Windows mutators, unknown method), `bridge_exception`, `decompile_cancelled`, `ambiguous`, `annotation_readback_mismatch`, `invalid_function_name`, `regex_stack_exhausted` (full set from `RequestFailure("...")` sites in `ReaGhidraBridge.java`). RUN: an unknown procedure name surfaced to the MCP client as `invalid_request` / category `invalid_input` with message `Unknown Ghidra procedure name or address: <name>` (the Node layer re-maps the bridge code); a 3 000 ms startup budget produced `provider_timeout` (`details.timeout_ms: 3000`) and the runtime root was removed afterwards.
 
 Handshake schema (verbatim, `src/ghidra/GhidraSessionValues.ts:37-106`) is reproduced here because it is the identity contract:
 
@@ -569,7 +569,7 @@ Walkthrough: for PE targets, extension, seed, or MIPS soft-float configurations 
 | `no_return_repair` | `returning-imports-decoded-return-v2` or `disabled-windows-p0` | |
 | `process_launch` | `inspected-jvm-launch-support-v1` or `official-headless-script-v1` (Windows) | |
 | `jump_table_evidence`, `decompiler_jump_loads` | `typed-case-default-blocks-v1`, `true` | |
-| `loader`, `language_id`, `compiler_spec_id`, `language_selection` | `auto-from-header` or pinned | `language_selection` is `configured-v1` (env override) or `provider-pinned-v1` (MIPS/RISC-V/PPC/PSP lanes) |
+| `loader`, `language_id`, `compiler_spec_id`, `language_selection` | `auto-from-header` or pinned | `language_selection` is `configured-v1` (env override), `provider-pinned-v1` (MIPS/RISC-V/PPC/PSP lanes) or `caller-supplied-v1` (raw binary; RUN) and absent for plain header-detected ELF/PE (RUN: ELF profile shows `language_id: auto-from-header`, `compiler_spec_id: auto-default`) |
 | `analyzer_preset` (+ `analysis_options.disabled_analyzers`) | `ghidra-default` or `ghidra-default+disabled:<names>` | |
 | lane-specific | `mips_*`, `riscv_*`, `powerpc_*`, DOS `load_segment`, `entry_offset`, `register_context`, raw `entry_point` | |
 | added by the provider | `analysis_extensions`, `analysis_seeds` | JAR digest / seed file digest (`GhidraProvider.ts:277-301`) |
@@ -684,6 +684,31 @@ Source: `docs/windows-ghidra-p0.md`, `src/ghidra/GhidraProviderCapabilities.ts:3
 | Mutating ops | `set_address_name`, `set_addresses_names`, `annotate_native_function`: edit the ephemeral database; `mutatesArtifact: true` in descriptor, so they disable replay and invalidate the snapshot (`BinarySession.ts:711`). They are **refused while an external mutation is attempted with Ghidra active** (`BinarySession.ts:410-416`: "Close the active Ghidra session explicitly before an external mutation; rebinding would discard its ephemeral analysis edits."). |
 | Network | `mayAccessNetwork: false`; Ghidra's own behaviour is not network-policed by REA (PDB symbol servers are not searched by REA; `docs/ghidra-provider.md` "PDB debug-symbol coverage"). |
 | Resource limits | JVM heap (`-Xmx`), 2 GC / 2 compiler threads; no REA CPU limit; no fixed per-operation or response-size ceiling ("operations run until a result, caller cancellation, or provider shutdown"). |
+
+## 9.1 Lab verification (RUN, Ghidra 12.1.4 + JDK 21.0.12 on Linux x64)
+
+Driver: `docs/deep-dive/manual-tests/mcp-driver/drive.mjs` with step files in the verification scratchpad; earlier transcripts `scratchpad/mcp/t2.json`, `t3.json`. Observations that confirm or refine the text above:
+
+| Observation (real run) | Value |
+|---|---|
+| `rea doctor --provider ghidra --json` | `ghidra-version 12.1.4`, `ghidra-java "21.0.12.1; 64-bit; JDK ... accepted a 64-bit full JDK 21 or newer"`, native decompiler `linux_x86_64` header-inspected |
+| `open_binary` latency (ELF / PE / raw) | 19-101 ms / 640 ms / 10 ms: Ghidra is **not** started by `open_binary`, including for PE |
+| First provider op latency (tiny ELF / small PE / 8-byte raw) | 16-19 s / 49.7 s / 26 s (import + auto-analysis + bridge bind) |
+| Later ops | 3-60 ms; `annotate_native_function` 241 ms; `close_binary` about 0.5 s |
+| JVM argv (ELF) | `-Xmx2G -XX:ParallelGCThreads=2 -XX:CICompilerCount=2 -Djava.awt.headless=true -Duser.home=<rt>/home -Djava.io.tmpdir=<rt>/tmp -showversion -cp .../Utility.jar ghidra.Ghidra ghidra.app.util.headless.AnalyzeHeadless <rt>/project rea-project -import <rt>/target-<sha12>.bin -readOnly -deleteProject -log ... -scriptlog ... -scriptPath .../bridge/ghidra -postScript ReaGhidraNoReturnFix.java -postScript ReaGhidraBridge.java <rt>/session.json` (no pre-scripts for plain ELF) |
+| `GHIDRA_HEADLESS_MAXMEM=1G` | `-Xmx1G` in argv |
+| Caller `_JAVA_OPTIONS` / `JAVA_TOOL_OPTIONS` | present in REA's env but empty in the JVM's `/proc/<pid>/environ`; `GHIDRA_JAVA_OPTIONS`, `GHIDRA_HEADLESS_JAVA_OPTIONS`, `JDK_JAVA_OPTIONS` also empty |
+| Redirected env | `HOME`, `TMPDIR`, `XDG_CACHE_HOME`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME` all point inside `/tmp/rea-ghidra-XXXXXX/` |
+| Runtime root | mode 0700; `session.json`, `ownership.json`, `target-<sha12>.bin` mode 0600; `ghidra.log`/`script.log` are 0644 inside the 0700 root; `bridge.sock` (srw-------) |
+| `ownership.json` | keys `run_id, transport, endpoint_path, pid, process_group_id, parent_pid, ownership_kind ("posix-process-group"), launcher, headless_script, created_at` |
+| `list_documents` | `["target-c9c84e179642.bin"]` (the temp-copy name) |
+| Defaults | `read_bytes` without length returned 256 bytes; `length: 0` rejected by schema (`>=1`); `search_bytes limit: 5000` rejected (`<=1000`) |
+| Mutation | `set_addresses_names` -> `{"0x101229":true,"0x10125b":true}`; `annotate_native_function` with no change field rejected ("Supply at least one annotation change"); rename visible in later `list_procedures` |
+| Seeds + disabled analyzers | profile showed `analyzer_preset: "ghidra-default+disabled:Stack"` and `analysis_seeds {format "rea-ghidra-seeds-v1", entries {function 1, code 0, label 1}}`; label seed produced name `seeded_main` at the `main` entry |
+| Raw binary | `inspect_native_load_image` status `verified`, `language_id x86:LE:64:default`, spec `gcc`, profile `loader BinaryLoader`, `language_selection caller-supplied-v1`, `entry_seed external-entry-and-function-before-analysis-v1`; ELF returned status `unsupported` (attestation covers DOS MZ/COM/raw only) |
+| Startup timeout | `REA_GHIDRA_STARTUP_TIMEOUT_MS=3000` -> `provider_timeout` after 3.6 s, runtime dir removed, `close_binary` ok |
+| Capability groups | every Ghidra op reports effects `launches_process, may_write_filesystem`; only the 3 mutators add `mutates_artifact`; no op reports `may_show_ui` |
+| Not confirmed | Cancelling an in-flight call: a client abort at 60 ms did not stop a 600 ms `trace_native_values` call (it completed), so "cancel kills the session" was **not** reproduced end-to-end (code path only) |
 
 ---
 

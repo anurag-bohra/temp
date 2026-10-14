@@ -1,0 +1,397 @@
+[
+ {
+  "name": "01 ToolEffects + derived annotations",
+  "roots": [
+   "src/contracts/toolEffects.ts"
+  ],
+  "missing": [],
+  "files": 1,
+  "loc": 777,
+  "dirs": {
+   "contracts": 1
+  },
+  "ext": []
+ },
+ {
+  "name": "02 Evidence record + ledger + bundle",
+  "roots": [
+   "src/domain/evidence.ts",
+   "src/domain/evidenceBundle.ts",
+   "src/application/investigation/EvidenceLedger.ts"
+  ],
+  "missing": [],
+  "files": 72,
+  "loc": 14297,
+  "dirs": {
+   "application": 2,
+   "domain": 70
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "zod"
+  ]
+ },
+ {
+  "name": "03 Unknown registry",
+  "roots": [
+   "src/domain/residualUnknown.ts",
+   "src/application/investigation/InvestigationRecords.ts"
+  ],
+  "missing": [],
+  "files": 204,
+  "loc": 43683,
+  "dirs": {
+   "application": 6,
+   "domain": 167,
+   "process": 9,
+   "config": 1,
+   "contracts": 21
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "diff",
+   "zod"
+  ]
+ },
+ {
+  "name": "04 MCP server scaffold",
+  "roots": [
+   "src/server/createServer.ts"
+  ],
+  "missing": [],
+  "files": 1190,
+  "loc": 253794,
+  "dirs": {
+   "server": 90,
+   "domain": 377,
+   "contracts": 75,
+   "application": 219,
+   "process": 44,
+   "config": 11,
+   "artifacts": 45,
+   "windows": 3,
+   "generatedPackageMetadata.ts": 1,
+   "filesystem": 6,
+   "rizin": 2,
+   "gdb": 1,
+   "cutter": 2,
+   "composition": 26,
+   "objdump": 1,
+   "catalogIdentity.ts": 1,
+   "cliCommandNames.ts": 1,
+   "serverIdentity.ts": 1,
+   "identity.ts": 1,
+   "dotnet": 26,
+   "adb": 6,
+   "jeb": 3,
+   "flutter": 5,
+   "pcap": 6,
+   "apktool": 3,
+   "android": 9,
+   "mcpStartupPolicy.ts": 1,
+   "firmware": 7,
+   "native": 44,
+   "ida": 15,
+   "logger.ts": 1,
+   "ghidra": 41,
+   "hopper": 21,
+   "javascript": 15,
+   "browser": 41,
+   "frida": 1,
+   "rust": 3,
+   "go": 7,
+   "electron": 3,
+   "sqlite": 5,
+   "evm": 6,
+   "wasm": 9,
+   "signals": 2,
+   "captures": 3
+  },
+  "ext": [
+   "@babel/parser",
+   "@babel/types",
+   "@electron/asar",
+   "@jridgewell/trace-mapping",
+   "@lydell/node-pty",
+   "@modelcontextprotocol/client",
+   "@modelcontextprotocol/server",
+   "@xmldom/xmldom",
+   "@xterm/addon-serialize",
+   "@xterm/headless",
+   "@zip.js/zip.js",
+   "canonicalize",
+   "diff",
+   "electron",
+   "frida",
+   "jsonc-parser",
+   "parse5",
+   "pino",
+   "playwright-core",
+   "plist",
+   "semver",
+   "smol-toml",
+   "stream-chain",
+   "stream-json",
+   "write-file-atomic",
+   "ws",
+   "yaml",
+   "zod"
+  ]
+ },
+ {
+  "name": "05 Provider registry + session router",
+  "roots": [
+   "src/application/binary/AnalysisProviderRegistry.ts",
+   "src/application/binary/SessionProviderRouter.ts",
+   "src/application/binary/BinarySession.ts"
+  ],
+  "missing": [],
+  "files": 285,
+  "loc": 59240,
+  "dirs": {
+   "application": 29,
+   "domain": 200,
+   "process": 14,
+   "config": 1,
+   "contracts": 23,
+   "artifacts": 10,
+   "filesystem": 5,
+   "windows": 2,
+   "generatedPackageMetadata.ts": 1
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "@xmldom/xmldom",
+   "canonicalize",
+   "diff",
+   "plist",
+   "stream-chain",
+   "stream-json",
+   "zod"
+  ]
+ },
+ {
+  "name": "06 Ghidra headless bridge",
+  "roots": [
+   "src/ghidra/GhidraProvider.ts"
+  ],
+  "missing": [],
+  "files": 283,
+  "loc": 60987,
+  "dirs": {
+   "ghidra": 41,
+   "process": 21,
+   "windows": 3,
+   "generatedPackageMetadata.ts": 1,
+   "domain": 186,
+   "config": 4,
+   "contracts": 21,
+   "logger.ts": 1,
+   "application": 2,
+   "filesystem": 3
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "@xmldom/xmldom",
+   "canonicalize",
+   "diff",
+   "pino",
+   "write-file-atomic",
+   "zod"
+  ]
+ },
+ {
+  "name": "07 Hopper bridge",
+  "roots": [
+   "src/hopper/HopperProvider.ts"
+  ],
+  "missing": [],
+  "files": 253,
+  "loc": 52335,
+  "dirs": {
+   "hopper": 21,
+   "contracts": 21,
+   "domain": 182,
+   "application": 2,
+   "process": 18,
+   "config": 4,
+   "windows": 3,
+   "generatedPackageMetadata.ts": 1,
+   "logger.ts": 1
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "diff",
+   "pino",
+   "write-file-atomic",
+   "zod"
+  ]
+ },
+ {
+  "name": "08 Prompts (contracts + registration)",
+  "roots": [
+   "src/contracts/promptContracts.ts",
+   "src/server/registerPrompts.ts",
+   "src/server/promptCompletion.ts"
+  ],
+  "missing": [],
+  "files": 430,
+  "loc": 91730,
+  "dirs": {
+   "server": 5,
+   "domain": 303,
+   "contracts": 75,
+   "application": 14,
+   "catalogIdentity.ts": 1,
+   "cliCommandNames.ts": 1,
+   "process": 13,
+   "config": 1,
+   "artifacts": 9,
+   "windows": 2,
+   "generatedPackageMetadata.ts": 1,
+   "filesystem": 5
+  },
+  "ext": [
+   "@babel/parser",
+   "@babel/types",
+   "@jridgewell/trace-mapping",
+   "@modelcontextprotocol/server",
+   "canonicalize",
+   "diff",
+   "electron",
+   "stream-chain",
+   "stream-json",
+   "zod"
+  ]
+ },
+ {
+  "name": "09 JS/Electron analyzer (boundary analysis)",
+  "roots": [
+   "src/application/javascript/ElectronBoundaryAnalysis.ts"
+  ],
+  "missing": [],
+  "files": 39,
+  "loc": 7850,
+  "dirs": {
+   "application": 4,
+   "domain": 35
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "zod"
+  ]
+ },
+ {
+  "name": "10 .NET static provider",
+  "roots": [
+   "src/dotnet/ManagedStaticProvider.ts"
+  ],
+  "missing": [],
+  "files": 287,
+  "loc": 60156,
+  "dirs": {
+   "dotnet": 26,
+   "process": 13,
+   "filesystem": 5,
+   "domain": 199,
+   "artifacts": 10,
+   "application": 9,
+   "windows": 2,
+   "generatedPackageMetadata.ts": 1,
+   "config": 1,
+   "contracts": 21
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "@xmldom/xmldom",
+   "canonicalize",
+   "diff",
+   "plist",
+   "zod"
+  ]
+ },
+ {
+  "name": "11 Artifact graph provider",
+  "roots": [
+   "src/artifacts/ArtifactProvider.ts"
+  ],
+  "missing": [],
+  "files": 280,
+  "loc": 60322,
+  "dirs": {
+   "artifacts": 41,
+   "domain": 187,
+   "application": 3,
+   "process": 16,
+   "config": 1,
+   "contracts": 21,
+   "windows": 3,
+   "generatedPackageMetadata.ts": 1,
+   "filesystem": 5,
+   "native": 2
+  },
+  "ext": [
+   "@electron/asar",
+   "@jridgewell/trace-mapping",
+   "@xmldom/xmldom",
+   "@zip.js/zip.js",
+   "canonicalize",
+   "diff",
+   "plist",
+   "zod"
+  ]
+ },
+ {
+  "name": "12 CDP browser provider",
+  "roots": [
+   "src/browser/CdpBrowserProvider.ts"
+  ],
+  "missing": [],
+  "files": 311,
+  "loc": 74789,
+  "dirs": {
+   "browser": 32,
+   "domain": 243,
+   "application": 3,
+   "process": 9,
+   "config": 1,
+   "contracts": 21,
+   "javascript": 2
+  },
+  "ext": [
+   "@babel/parser",
+   "@babel/types",
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "diff",
+   "electron",
+   "ws",
+   "zod"
+  ]
+ },
+ {
+  "name": "13 Process supervision (OwnedCommand)",
+  "roots": [
+   "src/process/OwnedCommand.ts"
+  ],
+  "missing": [],
+  "files": 80,
+  "loc": 16828,
+  "dirs": {
+   "process": 12,
+   "domain": 64,
+   "config": 1,
+   "windows": 2,
+   "generatedPackageMetadata.ts": 1
+  },
+  "ext": [
+   "@jridgewell/trace-mapping",
+   "canonicalize",
+   "zod"
+  ]
+ }
+]
