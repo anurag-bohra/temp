@@ -1,0 +1,19 @@
+{
+  "name": "@rtk/js-analyzer",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "rtk-js": "./bin/rtk-js.ts"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@rtk/evidence": "*",
+    "@babel/parser": "^7.26.0",
+    "@electron/asar": "^3.2.0"
+  }
+}

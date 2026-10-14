@@ -1,0 +1,8 @@
+# @rtk/triage
+Static-first malware triage pipeline: identify (magic/hashes/entropy) → policy-gated analyzers → Evidence → Facts → rules → score → exports.
+- Analyzers: built-in static features (ELF/PE parsers, strings), YARA, `@rtk/js-analyzer`, `@rtk/dotnet-analyzer`, `@rtk/artifacts` (inspection + quota-enforcing extraction + recursive member triage), optional `ghidra` (`deep: true`) and `sandbox` (`detonate: true`, denied unless profile `lab-vm` **and** explicit approval).
+- Facts adapters for REA operations (verified against real REA Evidence) and for the toolkit packages; 36 default rules with indicative ATT&CK ids; diminishing-returns score (heuristic, **not a verdict**).
+- Outputs: `report.md` (defanged IOCs), `report.json`, `stix.json` (parses with the reference python `stix2` library), `misp.json`, `iocs.csv` (formula-neutralised), `evidence-bundle.json` (REA-compatible), `manifest.json` (output hashes); SQLite `CaseStore` with cross-sample IOC pivots.
+CLI: `node src/cli.ts <sample> --profile static-analysis --out case/ [--yara rules.yar] [--deep] [--detonate --profile lab-vm --approve sandbox]`.
+**Verified (27 tests):** parsers cross-checked with `nm`, `readelf`-equivalent data and mingw `objdump`; IOC extraction incl. base64/hex decoding; real REA Evidence → findings; JS/.NET/archive/zip-slip/deep-Ghidra/sandbox-policy integration on the demo samples.
+**Limits:** rules are name/indicator matches (benign programs can match); no unpacking; ATT&CK mapping is indicative; Linux/ELF is the best-verified lane; PE/Mach-O depth is shallow; TI enrichment hooks are not implemented.

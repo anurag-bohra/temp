@@ -1,0 +1,83 @@
+{
+ "provenance": "Reduced copy of REA v6.4.0 output manual-tests/outputs/T1-js-v1.json (operation analyze_javascript_application on jsapp v1): summary + selected graph node properties.",
+ "provider": {
+  "id": "rea-javascript-application",
+  "name": "REA JavaScript application analyzer",
+  "version": "1"
+ },
+ "summary": {
+  "browser_windows": 1,
+  "explicit_web_preferences": 2,
+  "preload_entrypoints": 1,
+  "context_bridge_apis": 1,
+  "exposed_api_members": 1,
+  "ipc": {
+   "operations": 2,
+   "literal_channels": 1,
+   "dynamic_channel_operations": 0,
+   "renderer_transmissions": 1,
+   "renderer_listeners": 0,
+   "main_handlers": 1,
+   "paired_renderer_transmissions": 1,
+   "ambiguous_renderer_transmissions": 0,
+   "unpaired_literal_renderer_transmissions": 0
+  },
+  "sender_validation_observations": 0,
+  "utility_processes": 0,
+  "resolved_utility_entrypoints": 0,
+  "native_addon_bindings": 0,
+  "resolved_native_addon_bindings": 0
+ },
+ "browser_windows": [
+  {
+   "source_path": "src/main.js",
+   "options_status": "object-literal",
+   "web_preferences_status": "object-literal",
+   "web_preferences": [
+    {
+     "name": "nodeIntegration",
+     "value": {
+      "status": "literal",
+      "value": true,
+      "expression": null
+     }
+    },
+    {
+     "name": "preload",
+     "value": {
+      "status": "literal",
+      "value": "preload.js",
+      "expression": null
+     }
+    }
+   ],
+   "preload_path": "preload.js",
+   "preload_resolution_context": "filesystem-expression",
+   "absence_means_default": false
+  }
+ ],
+ "ipc_channels": [
+  {
+   "side": "main",
+   "operation": "handle",
+   "mode": "handle",
+   "channel": "run-task",
+   "channel_expression": null,
+   "resolution": "literal"
+  }
+ ],
+ "context_bridge_apis": [
+  {
+   "world": "main",
+   "world_id": null,
+   "api_key": "api",
+   "api_key_expression": null,
+   "api_status": "object-literal",
+   "members": [
+    "run"
+   ],
+   "unknown_members": 0,
+   "resolution_basis": "direct-syntax"
+  }
+ ]
+}

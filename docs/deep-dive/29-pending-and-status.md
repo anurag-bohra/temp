@@ -66,3 +66,7 @@ Status date: end of the "complete all pending" round. Everything is committed to
 
 ## 6. Scope reminders
 No real malware was handled; all samples are benign demos with inert indicators (`example.invalid`, TEST-NET). The vulnerability chapter stays at triage/analysis level. REA itself excludes exploit-payload automation, packer/anti-debug-evasion and DRM-bypass workflows (`CONTRIBUTING.md`).
+
+
+## 7. Update: toolkit implementations (blueprints 01-14) — completed
+Code is in [`/toolkit`](../../toolkit/README.md): 14 packages, **201 tests pass, 0 fail**, typecheck clean. The earlier gaps are closed: `mcp-gateway` is complete (19 tests, 5 of them live against the real REA server, including an injection test through Ghidra) and the triage pipeline now runs the JS, .NET, archive (recursive), Ghidra (opt-in) and sandbox (policy-gated, opt-in) analyzers with Evidence-to-Facts adapters (27 tests). Remaining: `hopper-bridge` is an unverified skeleton; five analyzer packages (`js-analyzer`, `dotnet-analyzer`, `artifacts`, `browser-observer`, `sandbox`) were not independently reviewed; no real malware or real LLM agent was used. This closes R4 and R5 above as far as a prototype-quality implementation goes.
