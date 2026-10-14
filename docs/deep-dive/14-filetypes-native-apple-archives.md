@@ -267,7 +267,7 @@ flowchart TD
 `inspect_artifact` / `extract_artifact` do **not** require a particular target kind: `ArtifactClient.execute` always inventories
 `this.target.sourcePath ?? this.target.path` (`src/artifacts/ArtifactProvider.ts:190,204,386-402`). For a Mach-O app bundle target
 that is the **bundle directory**; for an IPA/ZIP it is the archive file. The CLI one-shot forms (`rea inspect-artifact`,
-`rea extract-artifact`) go through `runProviderAnalysis` (`src/cli/artifactCommands.ts:193-253`).
+`rea extract-artifact`) go through `runProviderAnalysis` (`src/cli/artifactCommands.ts:193-248`).
 
 ### 2.4 Platform availability matrix
 
@@ -692,7 +692,7 @@ Fixed limitation: "Inspected a digest-verified Mach-O byte snapshot; filesystem-
   (`NativeDispatchMetadataInspection.ts:13-72`). The tool description in the catalog describes only the fallback ("symbol-level evidence"); the code first attempts true metadata decoding — a description/behaviour gap (flag in [25](25-gaps-risks-assumptions.md)).
   Binary decode (`AppleDispatchMetadata.ts`): reads the target (file ≤ **64 MiB** via bounded stable read; digest must equal the session digest) then `decodeAppleDispatchMetadata` → `parseMachoLayout` (slice selection by architecture policy; **little-endian 64-bit only**; ≤4096 load commands; segments, sections, chained-fixup/dyld-info rebase+bind decoding via `AppleMachoFixups`), ObjC class/category/protocol/property facets (`AppleObjc*`), Swift type/protocol/conformance facets and class vtables (`AppleSwift*`, `__swift5_types`), each decoded string ≤4096 bytes UTF-8-fatal, record budget `max_records` with explicit `truncated` coverage (`pushDispatchCoverage`). Never loads or executes target code.
 * **`analyze_swift_types`** (enhanced; Hopper/Ghidra/IDA name inventory): `categorizeSwiftTypes` over `list_procedures` + `list_names` demangled names into classes/structs/enums/protocols/extensions/other; counts are procedure-name counts, not unique types (`src/application/EnhancedTools.ts:557-585`). Requires a deep provider.
-* **`demangle_swift`** (class H, macOS): `swift-demangle --compact -- <symbols…>`; symbols must be single-line, NUL-free (`--` stops option injection); status per symbol `demangled|unchanged|invalid` via `parseDemangledSymbols` (`NativeMacOSProvider.ts:532-563`; `src/native/parsers/demangle.ts:15-47`).
+* **`demangle_swift`** (class H, macOS): `swift-demangle --compact -- <symbols…>`; symbols must be single-line, NUL-free (`--` stops option injection); status per symbol `demangled|unchanged|invalid` via `parseDemangledSymbols` (`NativeMacOSProvider.ts:532-563`; `src/native/parsers/demangle.ts:15-44`).
 
 ---
 
@@ -874,7 +874,7 @@ sequenceDiagram
   MCP->>Art: traceDylibResolution (pure TS)
   Agent->>MCP: inspect_signature {}
   MCP->>Nat: codesign on private snapshot copy
-  Nat-->>Agent: Evidence(signature; trust NOT validated)
+  Nat-->>Agent: Evidence(signature, trust NOT validated)
 ```
 
 *Figure 4 — Agent-driven archive triage.* Every arrow into MCP is a tool call; every response is an Evidence record added to the session ledger ([10](10-evidence-model-ledger-unknowns-bundles.md)).

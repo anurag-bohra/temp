@@ -275,21 +275,21 @@ sequenceDiagram
   participant MCP as MCP server
   participant Svc as JavaScriptApplicationService
   participant Rd as ASAR or directory reader
-  participant Par as JavaScriptAnalysisWorker (parent)
+  participant Prs as JavaScriptAnalysisWorker (parent)
   participant Ch as Worker child process
   Ag->>MCP: tools/call analyze_javascript_application {input_path, detail summary}
   MCP->>Svc: analyzeJavaScriptApplication(input, scope, signal)
   Svc->>Rd: inventory plus read selected relevant files
   Rd-->>Svc: manifest, digests, text
   loop each JS or TS source
-    Svc->>Par: analyze(file, node_budget)
-    Par->>Ch: request frame plus id.source file
+    Svc->>Prs: analyze(file, node_budget)
+    Prs->>Ch: request frame plus id.source file
     Ch->>Ch: parse then static then checkpoint id.static.json
-    Ch-->>Par: static frame (bytes, sha256)
-    Par->>Ch: admission frame (semantic_result_budget_bytes)
+    Ch-->>Prs: static frame (bytes, sha256)
+    Prs->>Ch: admission frame (semantic_result_budget_bytes)
     Ch->>Ch: semantic IR then projection then id.records
-    Ch-->>Par: complete frame (descriptor)
-    Par->>Par: verify digests, admit into retained budget
+    Ch-->>Prs: complete frame (descriptor)
+    Prs->>Prs: verify digests, admit into retained budget
   end
   Svc->>Svc: build application graph and semantic graph, bind IDs
   Svc-->>MCP: Evidence (rea.javascript-application-analysis)
@@ -653,7 +653,7 @@ sequenceDiagram
   WK-->>Rec: banner (admitWakaruVersion: verified or compatible or unsupported)
   Rec->>PL: prlimit ... wakaru inputs --unpack --level --provenance --emit-source-map --json -o staging
   WK-->>Rec: modules, source maps, provenance.json, stdout json
-  Rec->>Rec: validate report, paths, UTF-8 ranges, no symlinks; publish to absent output_directory
+  Rec->>Rec: validate report, paths, UTF-8 ranges, no symlinks, publish to absent output_directory
   Rec-->>MCP: Evidence (files, digests, analysis_input, limitations)
   MCP-->>Ag: result
   Ag->>MCP: analyze_javascript_application {analysis_input from result}

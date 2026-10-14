@@ -623,7 +623,7 @@ export const isSnapshotCacheable = (
 
 `binary_session` (MCP) "Report[s] the complete current target, provider, capability availability, client-feature, analysis, and server-identity status without starting analysis."
 
-Flow (`src/server/registerSessionStatusTool.ts:60-150`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
+Flow (`src/server/registerSessionStatusTool.ts:60-145`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
 
 ```ts
 const projectSessionStatus = (options: {...}) =>

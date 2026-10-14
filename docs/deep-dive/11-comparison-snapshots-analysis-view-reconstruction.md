@@ -1136,7 +1136,7 @@ Compares two canonical bundles by record membership, explicit one-to-one pairs a
 ### Schemas and algorithm (verbatim)
 
 
-`src/domain/bundleComparison.ts:16-330`
+`src/domain/bundleComparison.ts:16-328`
 
 ```ts
 const evidenceIdSchema = prefixedDigestSchema("ev");

@@ -1315,7 +1315,7 @@ Hosts and hooks can key off `_meta.provenance.untrusted_content === true` (reade
 
 ### 12.8.2 Remediation text returned inside tool errors (verbatim)
 
-Every error projects to `{category, message, retryable, remediation:{action}, details}` (`src/domain/analysisErrorProjection.ts:575-590`). The `remediation.action` strings are the agent-guiding repair instructions; they are produced by `analysisErrorRemediationAction`. The full function, including the guidance that chains an agent from a failure to the correct next tool:
+Every error projects to `{category, message, retryable, remediation:{action}, details}` (`src/domain/analysisErrorProjection.ts:575-587`). The `remediation.action` strings are the agent-guiding repair instructions; they are produced by `analysisErrorRemediationAction`. The full function, including the guidance that chains an agent from a failure to the correct next tool:
 
 `src/domain/analysisErrorPresentation.ts:35-119`
 

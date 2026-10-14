@@ -1107,7 +1107,7 @@ Facts that follow from the code:
 | Producer (tool) | `predicate_type` | `confidence` | `authority` | `subject` | Source |
 | --- | --- | --- | --- | --- | --- |
 | Provider-backed analysis (session execute) | `rea.analysis` (default) | observed (default) | shipped-artifact (default) | the open target | `src/application/binary/BinarySession.ts:750-775` |
-| `capture_process_scenario` | `rea.process-capture` | observed | **controlled-replay** | `null` | `src/application/process/ProcessEvidence.ts:28-54` |
+| `capture_process_scenario` | `rea.process-capture` | observed | **controlled-replay** | `null` | `src/application/process/ProcessEvidence.ts:28-45` |
 | `compare_artifacts` | `rea.artifact-comparison` | derived | analyst-inference | `null` | `src/server/registerArtifactComparisonTool.ts:53-69` |
 | `compare_functions` | `rea.function-comparison` | derived | analyst-inference | `null` | `src/server/registerFunctionComparisonTool.ts:86-100` |
 | `compare_process_captures` | `rea.process-comparison` | derived | analyst-inference | `null` | `src/server/registerProcessComparisonTool.ts:147-170` |

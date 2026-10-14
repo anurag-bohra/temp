@@ -27,10 +27,10 @@ Status date: end of this session. Everything is committed to branch `claude/swee
 | P3 | Run lab-only tier-D tools in an isolated VM: `capture_process_scenario`, Frida, GDB/Rizin | Detonation/dynamic confirmation is unverified | needs VM |
 | P4 | Write deep chapters 09, 15, 18, 19, 20, 21 (code-level) | Only primers exist | 6 chapters |
 | P5 | Test remaining static tools with prerequisites: .NET (`inspect_managed_*`), Android (JADX/Apktool + APK), pcap (tshark), WASM (WABT), firmware (Binwalk/Unblob), `inspect_pe_resources`, `inspect_signature`, SQLite (Node ≥ 24.15) | List in [27] §6 | per-tool installs |
-| P6 | Spot-check chapters 04, 05, 14, 16, 17 against code (writers were stopped early to save credits) | Citations (`file:line`) not independently re-verified | medium |
+| P6 | ~~Spot-check chapters~~ **Partly done**: all 850 `file:line` citations in chapters 02–17 checked mechanically (files exist, ranges within file length): 841 valid, 9 overshot by 2–15 lines and were clamped; 10 random citations read against source (document claim vs cited code) all consistent. **Still pending:** semantic check of the claims themselves (not just the citations) | medium |
 | P7 | Build the malware-specific layer REA lacks: YARA/IOC extraction, unpacking, case store, STIX/MISP export, enforcement of `untrusted_content` | Needed for the "port to our tools" goal | design + build |
 | P8 | Per-sub-tool design docs for the 13 blueprints in [24] (interfaces, repo seams, effort) | User wants to "create multiple sub-tools directly from the doc" | per blueprint |
-| P9 | Validate Mermaid diagrams in my chapters (01, 23, 26, 28, 30) with a renderer; chapter-02/03 diagrams were validated by their writer with mermaid 10.9.3 | I did not render mine | small |
+| P9 | ~~Validate Mermaid diagrams~~ **Done**: all 93 diagrams in all chapters parse under mermaid 10.9.3 (`mermaid.parse`). Fixed 4 failures (semicolons in sequence messages in ch14, 16 x2, 26; `Par` participant name in ch16). Parsing is not visual rendering — layout/legibility not inspected | done |
 | P10 | Retest on newer REA (this is HEAD `f75b1a4`, v6.4.0; project changes quickly) | Counts (207 tools, 47 providers, 25 clients) will drift; regenerate `catalog/` with the scripts | small |
 
 ## 3. Known discrepancies and weaknesses to remember (found by me or the writers)
@@ -45,5 +45,10 @@ Status date: end of this session. Everything is committed to branch `claude/swee
 - Build quirks: `npm run build:cached` failed in this container after `npm ci --ignore-scripts` (missing `node_modules/.package-lock.json`); the CLI requires the bundle step ([27] §2). Default `tools/list` is ~3.09 MB (≈215 KB with output schemas off and compact inputs) — relevant for agent token budgets.
 - The 207/47/25 counts and all RUN results are for the checked-out commit only.
 
-## 4. Scope reminders
+## 4. Verification performed on the final docs
+- Mermaid: 93/93 diagrams parse (mermaid 10.9.3 + jsdom). 
+- Citations: 850 in chapters 02–17; existence and line-range checked mechanically; 10-sample content check consistent.
+- Not verified: semantic accuracy of every statement; visual rendering; anything marked DOC.
+
+## 5. Scope reminders
 No real malware was handled; samples are benign. The vulnerability-research chapter stays at triage/analysis level and does not include exploitation steps; REA itself excludes exploit-payload automation and protection-defeat workflows (`CONTRIBUTING.md`).

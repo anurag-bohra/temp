@@ -379,7 +379,7 @@ C++ source for a single Windows x64 Node-API 8 addon (`native/windows/src/addon.
 | `prepack` / `prepare` | build-then-verify before publish / install husky hooks | `:258-259` |
 | `verify:*` (about 90) | real-engine and packaging verification lanes | `:162-300` |
 
-`scripts/run-exclusive.mjs` is a supervisor that spawns `run-exclusive-command.mjs` detached and forwards SIGINT/SIGTERM over IPC (`scripts/run-exclusive.mjs:1-45`); it serialises tasks that write shared artifacts. `scripts/check-dependency-install.mjs` compares the root lockfile's direct dependency versions against `node_modules/.package-lock.json` (`scripts/check-dependency-install.mjs:1-45`).
+`scripts/run-exclusive.mjs` is a supervisor that spawns `run-exclusive-command.mjs` detached and forwards SIGINT/SIGTERM over IPC (`scripts/run-exclusive.mjs:1-40`); it serialises tasks that write shared artifacts. `scripts/check-dependency-install.mjs` compares the root lockfile's direct dependency versions against `node_modules/.package-lock.json` (`scripts/check-dependency-install.mjs:1-45`).
 
 ### 5.3 Turbo task graph
 
