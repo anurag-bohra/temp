@@ -99,7 +99,7 @@ export interface ToolEffects {
 - `artifacts/ArtifactProvider.ts` closure 280 files; npm: `@zip.js/zip.js`, `@electron/asar`, `plist`, `@xmldom/xmldom`. Key behaviours to keep: integrity policy `fail`, path-traversal/symlink-escape rejection and fresh-temp extraction ("never overwrites, verifies cleanup"). **Effort:** M. **Risks for malware use:** add size/depth/ratio quotas (zip-bomb) and a sandboxed scratch mount; REA's quotas are documented in [14](14-filetypes-native-apple-archives.md).
 
 ### 12 — CDP browser provider
-- `browser/CdpBrowserProvider.ts` closure 311 files; Playwright/CDP; passive observation vs scenario driving; consent and loopback-only rules in [17](17-browser-and-web-observation.md). **Effort:** L. **Risks:** drives a live browser (tier D) — run in a disposable profile; `REA_BROWSER_NO_SANDBOX=true` removes the sandbox.
+- `browser/CdpBrowserProvider.ts` closure 311 files; Playwright/CDP; passive observation vs scenario driving; consent and loopback-only rules in [17](17-browser-and-web-observation.md). **Effort:** L. **Risks:** drives a live browser (tier D) — run in a disposable profile; the Chromium REA launches runs with its sandbox disabled by default (Playwright adds `--no-sandbox`; chapter 17 verification).
 
 ### 13 — Process supervision / capture
 - `process/OwnedCommand.ts` closure 80 files / 16.8K LOC; owned process groups, run tokens, identity (PID + path is not ownership), cleanup verification; PTY capture in `src/process/capture/`. **Effort:** M. **Must add:** a real sandbox (REA: "This is not a sandbox"). **Observed:** the comparison of identical runs reports `changed` (see [27] L10) — decide your own normalization before building diff-based detection on it.

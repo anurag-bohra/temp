@@ -1,0 +1,7 @@
+[{"tool":"open_binary","args":{"path":"/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/vuln/weak","provider_id":"ghidra"}},
+ {"tool":"resolve_containing_procedure","args":{"address":"0x4011b6"}},
+ {"tool":"analyze_function","args":{"procedure":"greet"}},
+ {"tool":"procedure_callers","args":{"procedure":"greet"}},
+ {"tool":"trace_call_path","args":{"start":"main","goal":"greet","direction":"forward"}},
+ {"tool":"search_procedures","args":{"pattern":"gets"}},
+ {"tool":"close_binary"}]

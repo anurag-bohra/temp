@@ -2,7 +2,7 @@
 
 Generated from the built catalogs (207 tools, 18 families, 47 providers) with family narrative hand-written from the REA README "What you can analyze" table and chapter findings. Tool descriptions are the **verbatim text advertised to the agent** (these are what steer LLM tool selection). Full input schemas: [catalog/](catalog/); full specs: [tool-specs/](tool-specs/). Architecture: [02](02-architecture-and-module-map.md), [03](03-mcp-server-runtime-and-contracts.md). Flow of prompts/skill: [12](12-ai-layer-prompts-and-skills.md). Defensive use: [23](23-defensive-malware-analysis-playbook.md).
 
-**Reading the tier column:** A = no flagged effects (parse/inspect only; still records session Evidence); B = writes files or launches helper processes; C = mutates the target database/session state; D = executes foreign code (detonation tier — VM only); E = mutates an attached Android device. Tier is derived from the audited `ToolEffects` flags; known audit gaps are noted per family.
+**Reading the tier column:** A = no flagged effects (parse/inspect only; most also record session Evidence); B = writes files or launches helper processes; C = mutates the target database/session state; D = executes foreign code (detonation tier — VM only); E = mutates an attached Android device. Tier is derived from the audited `ToolEffects` flags; known audit gaps are noted per family.
 
 ## 1. Family `direct` — surface `official-proxy` (41 tools)
 
@@ -725,7 +725,7 @@ Generated from the built catalogs (207 tools, 18 families, 47 providers) with fa
 
 **Malware-analysis use.** Dynamic API hooking inside a detonation VM/emulator (key/config extraction at runtime).
 
-**Safety on hostile samples.** EXECUTES target. Audit gap: `start_frida_session` is not flagged `executesForeignCode`; treat as execution.
+**Safety on hostile samples.** EXECUTES target. Audit gap (verified, chapter 21): `close_frida_session` resumes a paused spawn and a failed `start_frida_session` also resumes it, but neither is flagged `executesForeignCode`; treat the whole group as execution.
 
 | Tool | Tier | Session | Providers | CLI | Needs |
 |---|---|---|---|---|---|
@@ -986,7 +986,7 @@ Generated from the built catalogs (207 tools, 18 families, 47 providers) with fa
 
 **Requirements.** A Chrome-family browser (CDP).
 
-**Malware-analysis use.** Phishing/malvertising/drive-by page analysis in a disposable browser profile; replay-free review of saved captures (`inspect_web_network_capture`). `capture_browser_scenario` drives a live page (execution tier). Note `REA_BROWSER_NO_SANDBOX=true` removes the browser sandbox.
+**Malware-analysis use.** Phishing/malvertising/drive-by page analysis in a disposable browser profile; replay-free review of saved captures (`inspect_web_network_capture`). `capture_browser_scenario` drives a live page (execution tier). Note: the Chromium REA launches runs with its sandbox disabled by default (Playwright adds `--no-sandbox`) — use a disposable VM.
 
 **Safety on hostile samples.** Mixed: `inspect_web_network_capture`, compare tools static; live observe/scenario tools drive a browser.
 
