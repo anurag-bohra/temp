@@ -1,0 +1,17 @@
+{
+  "name": "rea-toolkit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Defensive malware-triage and vulnerability-research toolkit built around REA's contracts (independent implementations of the 13 porting blueprints + a triage layer).",
+  "type": "module",
+  "engines": { "node": ">=22.19" },
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

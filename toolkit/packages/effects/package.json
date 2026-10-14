@@ -1,0 +1,1 @@
+{ "name": "@rtk/effects", "version": "0.1.0", "type": "module", "exports": { ".": "./src/index.ts" }, "scripts": { "test": "node --test \"test/**/*.test.ts\"" } }

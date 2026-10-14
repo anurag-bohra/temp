@@ -1,0 +1,3 @@
+{ "name": "@rtk/triage", "version": "0.1.0", "type": "module", "exports": { ".": "./src/index.ts" }, "bin": { "rtk-triage": "./src/cli.ts" },
+  "scripts": { "test": "node --test \"test/**/*.test.ts\"" },
+  "dependencies": { "@rtk/evidence": "*", "@rtk/effects": "*", "@rtk/unknowns": "*" } }

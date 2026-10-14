@@ -1,0 +1,19 @@
+{
+  "note": "Operations provided by rea-toolkit packages (CLI/library names). Names that coincide with REA tools intentionally keep REA's name and Evidence shape.",
+  "tools": [
+    { "name": "triage_sample", "package": "@rtk/triage", "tier": "B", "summary": "Identify, analyse (static), extract IOCs, apply rules, export STIX/MISP/CSV/Markdown" },
+    { "name": "analyze_javascript_application", "package": "@rtk/js-analyzer", "tier": "A", "summary": "AST analysis of JS/Electron apps with sink and taint classification" },
+    { "name": "compare_javascript_applications", "package": "@rtk/js-analyzer", "tier": "A", "summary": "Security delta between two JS app analyses" },
+    { "name": "inspect_managed_assembly", "package": "@rtk/dotnet-analyzer", "tier": "A", "summary": ".NET metadata, IL call edges, literals, P/Invoke, resources" },
+    { "name": "compare_managed_assemblies", "package": "@rtk/dotnet-analyzer", "tier": "A", "summary": "Per-method IL and literal diff" },
+    { "name": "inspect_archive", "package": "@rtk/artifacts", "tier": "A", "summary": "Archive inventory and anomaly detection" },
+    { "name": "extract_archive", "package": "@rtk/artifacts", "tier": "B", "summary": "Quota-enforcing safe extraction" },
+    { "name": "observe_web_page", "package": "@rtk/browser-observer", "tier": "D", "summary": "Egress-allowlisted headless browser observation (drives a page)" },
+    { "name": "run_sandboxed", "package": "@rtk/sandbox", "tier": "D", "summary": "Namespace-isolated bounded execution of a sample" },
+    { "name": "analyze_binary_ghidra", "package": "@rtk/ghidra-bridge", "tier": "B", "summary": "Ghidra headless snapshot (functions, strings, xrefs, pseudocode)" },
+    { "name": "bind_provider", "package": "@rtk/provider-router", "tier": "A", "summary": "Deterministic provider binding with no fallback" },
+    { "name": "record_unknown", "package": "@rtk/unknowns", "tier": "A", "summary": "Record a residual Unknown" },
+    { "name": "update_unknown", "package": "@rtk/unknowns", "tier": "A", "summary": "Revise an Unknown with optimistic concurrency" },
+    { "name": "export_evidence_bundle", "package": "@rtk/evidence", "tier": "A", "summary": "Deterministic REA-compatible Evidence bundle" }
+  ]
+}

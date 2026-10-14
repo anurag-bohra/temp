@@ -1,0 +1,1 @@
+{ "name": "@rtk/unknowns", "version": "0.1.0", "type": "module", "exports": { ".": "./src/index.ts" }, "scripts": { "test": "node --test \"test/**/*.test.ts\"" }, "dependencies": { "@rtk/evidence": "*", "zod": "^4.0.0" } }

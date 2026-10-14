@@ -1,0 +1,8 @@
+{
+  "name": "@rtk/artifacts", "version": "0.1.0", "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "bin": { "rtk-artifacts": "./bin/rtk-artifacts.ts" },
+  "scripts": { "test": "node --test \"test/**/*.test.ts\"" },
+  "dependencies": { "@rtk/evidence": "*" },
+  "devDependencies": { "@electron/asar": "^4.0.0" }
+}
