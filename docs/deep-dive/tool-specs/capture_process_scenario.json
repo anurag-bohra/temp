@@ -1,0 +1,2450 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Run one caller-selected command under a PTY and return process capture Evidence with residual unknowns. The renderer admits at most 1,000,000 combined terminal cells, computed as columns × (rows + scrollback); every resize uses the selected scrollback and must fit the same budget. Supply a smaller terminal shape when that product is too large; dimensions are never clamped. A command name resolves through the inherited PATH; the working directory defaults to the caller's current directory; host environment variables are inherited with scenario overrides. Environment keys cannot contain '=' or NUL, and REA_PROCESS_RUN_ID is reserved for process ownership. Filesystem snapshots are opt-in through filesystem_observation_paths. A positive finalization_ms makes a timeout or idle deadline send SIGTERM to the captured root through its start identity, keep observing, and send SIGKILL once after the interval; exit.finalization records each attempt with its delivery result and the observed exit, and cancellation still ends the run at once. The target runs with the current user's permissions; this is not a security sandbox.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": true,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "minLength": 1
+      },
+      "__schema1": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema10": {
+        "default": [],
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at_ms": {
+                  "$ref": "#/$defs/__schema11"
+                },
+                "data": {
+                  "type": "string"
+                },
+                "sensitive": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "type": {
+                  "const": "input",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at_ms",
+                "type",
+                "data"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at_ms": {
+                  "$ref": "#/$defs/__schema11"
+                },
+                "columns": {
+                  "maximum": 65535,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "rows": {
+                  "maximum": 65535,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "type": {
+                  "const": "resize",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at_ms",
+                "type",
+                "columns",
+                "rows"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at_ms": {
+                  "$ref": "#/$defs/__schema11"
+                },
+                "signal": {
+                  "enum": [
+                    "SIGINT",
+                    "SIGTERM",
+                    "SIGKILL"
+                  ],
+                  "type": "string"
+                },
+                "type": {
+                  "const": "signal",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at_ms",
+                "type",
+                "signal"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema11": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema12": {
+        "$ref": "#/$defs/__schema13",
+        "default": 30000
+      },
+      "__schema13": {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+      },
+      "__schema14": {
+        "$ref": "#/$defs/__schema13",
+        "default": 30000
+      },
+      "__schema15": {
+        "default": 100,
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema16": {
+        "$ref": "#/$defs/__schema17",
+        "default": 0,
+        "description": "Milliseconds a target may keep running after SIGTERM when timeout_ms or idle_timeout_ms fires, before SIGKILL; 0 sends SIGKILL immediately. Both signals reach the captured root only while its launch-time start identity still matches; cancellation ends the run at once."
+      },
+      "__schema17": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema18": {
+        "additionalProperties": false,
+        "default": {
+          "file_bytes": 10000000,
+          "files": 10000,
+          "filesystem_depth": 16,
+          "output_bytes": 1000000,
+          "processes": 1000
+        },
+        "properties": {
+          "file_bytes": {
+            "$ref": "#/$defs/__schema13",
+            "default": 10000000,
+            "description": "Byte count for file."
+          },
+          "files": {
+            "$ref": "#/$defs/__schema13",
+            "default": 10000
+          },
+          "filesystem_depth": {
+            "default": 16,
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "output_bytes": {
+            "$ref": "#/$defs/__schema13",
+            "default": 1000000,
+            "description": "Byte count for output."
+          },
+          "processes": {
+            "$ref": "#/$defs/__schema13",
+            "default": 1000
+          }
+        },
+        "type": "object"
+      },
+      "__schema19": {
+        "additionalProperties": false,
+        "default": {
+          "paths": false,
+          "patterns": [],
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10
+        },
+        "properties": {
+          "paths": {
+            "default": false,
+            "type": "boolean"
+          },
+          "patterns": {
+            "default": [],
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "pattern": {
+                  "description": "Literal text to replace in captured output; not a regular expression.",
+                  "type": "string"
+                },
+                "replacement": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pattern",
+                "replacement"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "pids": {
+            "default": true,
+            "type": "boolean"
+          },
+          "ports": {
+            "default": true,
+            "type": "boolean"
+          },
+          "time_bucket_ms": {
+            "$ref": "#/$defs/__schema13",
+            "default": 10
+          }
+        },
+        "type": "object"
+      },
+      "__schema2": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "type": "array"
+      },
+      "__schema3": {
+        "$ref": "#/$defs/__schema1",
+        "default": "."
+      },
+      "__schema4": {
+        "additionalProperties": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "default": {},
+        "propertyNames": {
+          "minLength": 1,
+          "pattern": "^(?:[^=\\x00R][^=\\x00]*|R(?:[^=\\x00E][^=\\x00]*|E(?:[^=\\x00A][^=\\x00]*|A(?:[^=\\x00_][^=\\x00]*|_(?:[^=\\x00P][^=\\x00]*|P(?:[^=\\x00R][^=\\x00]*|R(?:[^=\\x00O][^=\\x00]*|O(?:[^=\\x00C][^=\\x00]*|C(?:[^=\\x00E][^=\\x00]*|E(?:[^=\\x00S][^=\\x00]*|S(?:[^=\\x00S][^=\\x00]*|S(?:[^=\\x00_][^=\\x00]*|_(?:[^=\\x00R][^=\\x00]*|R(?:[^=\\x00U][^=\\x00]*|U(?:[^=\\x00N][^=\\x00]*|N(?:[^=\\x00_][^=\\x00]*|_(?:[^=\\x00I][^=\\x00]*|I(?:[^=\\x00D][^=\\x00]*|D[^=\\x00]+)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)$",
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "__schema5": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/__schema1",
+          "minLength": 1
+        },
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "default": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "description": "The visible terminal and scrollback together must use at most 1,000,000 xterm renderer cells: columns × (rows + scrollback). Resize events use the same scrollback and limit.",
+        "properties": {
+          "columns": {
+            "$ref": "#/$defs/__schema7"
+          },
+          "rows": {
+            "$ref": "#/$defs/__schema8"
+          },
+          "scrollback": {
+            "$ref": "#/$defs/__schema9"
+          }
+        },
+        "type": "object"
+      },
+      "__schema7": {
+        "default": 80,
+        "maximum": 65535,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema8": {
+        "default": 24,
+        "maximum": 65535,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema9": {
+        "default": 1000,
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "arguments": [],
+        "environment": {},
+        "events": [],
+        "executable": "/usr/bin/true",
+        "filesystem_observation_paths": [],
+        "finalization_ms": 1500,
+        "idle_timeout_ms": 30000,
+        "limits": {
+          "file_bytes": 10000000,
+          "files": 10000,
+          "filesystem_depth": 16,
+          "output_bytes": 1000000,
+          "processes": 1000
+        },
+        "normalization": {
+          "paths": false,
+          "patterns": [],
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10
+        },
+        "settle_ms": 100,
+        "terminal": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "timeout_ms": 30000,
+        "working_directory": "/tmp"
+      }
+    ],
+    "properties": {
+      "arguments": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "events": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "executable": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Command name or executable path to run."
+      },
+      "filesystem_observation_paths": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "finalization_ms": {
+        "$ref": "#/$defs/__schema16",
+        "description": "Milliseconds a target may keep running after SIGTERM when timeout_ms or idle_timeout_ms fires, before SIGKILL; 0 sends SIGKILL immediately. Both signals reach the captured root only while its launch-time start identity still matches; cancellation ends the run at once."
+      },
+      "idle_timeout_ms": {
+        "$ref": "#/$defs/__schema14"
+      },
+      "limits": {
+        "$ref": "#/$defs/__schema18",
+        "description": "Resource budgets that bound execution and retained output for this operation."
+      },
+      "normalization": {
+        "$ref": "#/$defs/__schema19"
+      },
+      "settle_ms": {
+        "$ref": "#/$defs/__schema15"
+      },
+      "terminal": {
+        "$ref": "#/$defs/__schema6",
+        "description": "The visible terminal and scrollback together must use at most 1,000,000 xterm renderer cells: columns × (rows + scrollback). Resize events use the same scrollback and limit."
+      },
+      "timeout_ms": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "working_directory": {
+        "$ref": "#/$defs/__schema3"
+      }
+    },
+    "required": [
+      "executable"
+    ],
+    "type": "object"
+  },
+  "kind": "session",
+  "name": "capture_process_scenario",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/__schema13"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {},
+      "__schema14": {
+        "additionalProperties": false,
+        "description": "The capture must preserve its canonical scenario, comparison, and normalization SHA-256 commitments; ordered capture timestamps and contiguous sequence numbers; before and final filesystem snapshots with truncation propagated; and exit-code consistency with deadline termination. The event journal is required; empty journals are valid. A non-empty journal must reference every captured observation exactly once with unique in-range references. These cross-field invariants are checked by REA after capture.",
+        "properties": {
+          "cleanup": {
+            "$ref": "#/$defs/__schema51"
+          },
+          "event_journal": {
+            "$ref": "#/$defs/__schema34"
+          },
+          "exit": {
+            "$ref": "#/$defs/__schema20"
+          },
+          "files_after": {
+            "$ref": "#/$defs/__schema36"
+          },
+          "files_before": {
+            "$ref": "#/$defs/__schema35"
+          },
+          "filesystem_checkpoints": {
+            "$ref": "#/$defs/__schema28"
+          },
+          "filesystem_effects": {
+            "$ref": "#/$defs/__schema37"
+          },
+          "frames": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "interaction_events": {
+            "$ref": "#/$defs/__schema19"
+          },
+          "limitations": {
+            "$ref": "#/$defs/__schema49"
+          },
+          "manifest": {
+            "$ref": "#/$defs/__schema15"
+          },
+          "normalization": {
+            "$ref": "#/$defs/__schema16"
+          },
+          "process_samples": {
+            "$ref": "#/$defs/__schema27"
+          },
+          "rendered_frames": {
+            "$ref": "#/$defs/__schema18"
+          },
+          "residual_unknowns": {
+            "$ref": "#/$defs/__schema50"
+          },
+          "settlement": {
+            "$ref": "#/$defs/__schema26"
+          },
+          "truncated": {
+            "$ref": "#/$defs/__schema38"
+          },
+          "truncation_details": {
+            "$ref": "#/$defs/__schema39"
+          }
+        },
+        "required": [
+          "manifest",
+          "normalization",
+          "frames",
+          "rendered_frames",
+          "interaction_events",
+          "exit",
+          "settlement",
+          "process_samples",
+          "filesystem_checkpoints",
+          "event_journal",
+          "files_before",
+          "files_after",
+          "filesystem_effects",
+          "truncated",
+          "truncation_details",
+          "limitations",
+          "residual_unknowns",
+          "cleanup"
+        ],
+        "type": "object"
+      },
+      "__schema15": {
+        "additionalProperties": false,
+        "properties": {
+          "architecture": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "comparison_contract": {
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema13"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "comparison_contract_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          },
+          "executable_identity": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "state": {
+                "enum": [
+                  "path_metadata_unchanged",
+                  "unknown"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "executable_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "full_scenario_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "normalization_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "platform": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "provider_version": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pty_backend": {
+            "const": "node-pty",
+            "type": "string"
+          },
+          "rea_version": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scenario": {
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema13"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "selected_executable_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "started_at": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rea_version",
+          "provider_version",
+          "platform",
+          "architecture",
+          "pty_backend",
+          "started_at",
+          "completed_at",
+          "scenario",
+          "comparison_contract",
+          "full_scenario_sha256",
+          "comparison_contract_sha256",
+          "selected_executable_sha256",
+          "executable_sha256",
+          "executable_identity",
+          "normalization_sha256"
+        ],
+        "type": "object"
+      },
+      "__schema16": {
+        "additionalProperties": false,
+        "properties": {
+          "paths": {
+            "type": "boolean"
+          },
+          "patterns": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "pattern": {
+                  "type": "string"
+                },
+                "replacement": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pattern",
+                "replacement"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "pids": {
+            "type": "boolean"
+          },
+          "ports": {
+            "type": "boolean"
+          },
+          "time_bucket_ms": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "paths",
+          "pids",
+          "ports",
+          "time_bucket_ms",
+          "patterns"
+        ],
+        "type": "object"
+      },
+      "__schema17": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "data": {
+              "type": "string"
+            },
+            "raw_data": {
+              "type": "string"
+            },
+            "sequence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "sequence",
+            "at_ms",
+            "data"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema18": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "active_buffer": {
+              "enum": [
+                "normal",
+                "alternate"
+              ],
+              "type": "string"
+            },
+            "at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "columns": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "cursor_x": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "cursor_y": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "lines": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "rows": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "sequence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "serialized_state": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sequence",
+            "at_ms",
+            "columns",
+            "rows",
+            "cursor_x",
+            "cursor_y",
+            "active_buffer",
+            "lines",
+            "serialized_state"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema19": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "data": {
+              "type": "string"
+            },
+            "dispatched_at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "outcome": {
+              "enum": [
+                "dispatched",
+                "target_exited",
+                "failed"
+              ],
+              "type": "string"
+            },
+            "scheduled_at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "sequence": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "enum": [
+                "input",
+                "resize",
+                "signal"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "sequence",
+            "scheduled_at_ms",
+            "dispatched_at_ms",
+            "type",
+            "data",
+            "outcome"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "finalization": {
+            "additionalProperties": false,
+            "properties": {
+              "elapsed_ms": {
+                "$ref": "#/$defs/__schema22"
+              },
+              "exit_code": {
+                "$ref": "#/$defs/__schema23"
+              },
+              "requested_ms": {
+                "$ref": "#/$defs/__schema21"
+              },
+              "signals": {
+                "$ref": "#/$defs/__schema24"
+              }
+            },
+            "required": [
+              "requested_ms",
+              "elapsed_ms",
+              "exit_code",
+              "signals"
+            ],
+            "type": "object"
+          },
+          "reason": {
+            "enum": [
+              "exited",
+              "timeout",
+              "idle_timeout"
+            ],
+            "type": "string"
+          },
+          "signal": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "signal",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema21": {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+      },
+      "__schema22": {
+        "anyOf": [
+          {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema23": {
+        "anyOf": [
+          {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema24": {
+        "items": {
+          "$ref": "#/$defs/__schema25"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema25": {
+        "additionalProperties": false,
+        "properties": {
+          "delivery": {
+            "enum": [
+              "signaled",
+              "gone",
+              "identity-changed",
+              "unverified"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sent_at_ms": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "signal": {
+            "enum": [
+              "SIGTERM",
+              "SIGKILL"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "signal",
+          "sent_at_ms",
+          "delivery"
+        ],
+        "type": "object"
+      },
+      "__schema26": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "cleanup_outcome": {
+                "const": "not_required",
+                "type": "string"
+              },
+              "elapsed_ms": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "state": {
+                "const": "quiesced",
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "elapsed_ms",
+              "cleanup_outcome"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "cleanup_outcome": {
+                "enum": [
+                  "cleaned",
+                  "failed"
+                ],
+                "type": "string"
+              },
+              "elapsed_ms": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "state": {
+                "enum": [
+                  "alive_at_deadline",
+                  "unverifiable"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "elapsed_ms",
+              "cleanup_outcome"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema27": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "command": {
+              "type": "string"
+            },
+            "parent_pid": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "pid": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "process_group_id": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "session_id": {
+              "anyOf": [
+                {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "at_ms",
+            "pid",
+            "parent_pid",
+            "command",
+            "process_group_id",
+            "session_id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema28": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "at_ms": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "effects": {
+              "items": {
+                "$ref": "#/$defs/__schema33"
+              },
+              "type": "array"
+            },
+            "files": {
+              "items": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "type": "array"
+            },
+            "name": {
+              "enum": [
+                "before",
+                "after_settlement"
+              ],
+              "type": "string"
+            },
+            "truncated": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "at_ms",
+            "files",
+            "effects",
+            "truncated"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema29": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "$ref": "#/$defs/__schema31"
+              },
+              "path": {
+                "$ref": "#/$defs/__schema30"
+              },
+              "sha256": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "size": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "symlink_target": {
+                "type": "null"
+              },
+              "type": {
+                "const": "file",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "mode",
+              "size",
+              "type",
+              "sha256",
+              "symlink_target"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "$ref": "#/$defs/__schema31"
+              },
+              "path": {
+                "$ref": "#/$defs/__schema30"
+              },
+              "sha256": {
+                "type": "null"
+              },
+              "size": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "symlink_target": {
+                "type": "string"
+              },
+              "type": {
+                "const": "symlink",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "mode",
+              "size",
+              "type",
+              "sha256",
+              "symlink_target"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "mode": {
+                "$ref": "#/$defs/__schema31"
+              },
+              "path": {
+                "$ref": "#/$defs/__schema30"
+              },
+              "sha256": {
+                "type": "null"
+              },
+              "size": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "symlink_target": {
+                "type": "null"
+              },
+              "type": {
+                "enum": [
+                  "directory",
+                  "other"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "mode",
+              "size",
+              "type",
+              "sha256",
+              "symlink_target"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "type": "string"
+      },
+      "__schema31": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema32": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema33": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "after": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "before": {
+                "type": "null"
+              },
+              "path": {
+                "type": "string"
+              },
+              "status": {
+                "const": "created",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "status",
+              "before",
+              "after"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "after": {
+                "type": "null"
+              },
+              "before": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "path": {
+                "type": "string"
+              },
+              "status": {
+                "const": "deleted",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "status",
+              "before",
+              "after"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "after": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "before": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "path": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "modified",
+                  "unchanged"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "status",
+              "before",
+              "after"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "after": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema29"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "before": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema29"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "reason": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "status": {
+                "const": "unknown",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "status",
+              "before",
+              "after",
+              "reason"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema34": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "capture_order": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "collection": {
+              "enum": [
+                "frames",
+                "rendered_frames",
+                "interaction_events",
+                "lifecycle",
+                "process_samples",
+                "filesystem_checkpoints"
+              ],
+              "type": "string"
+            },
+            "index": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "capture_order",
+            "collection",
+            "index"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema35": {
+        "items": {
+          "$ref": "#/$defs/__schema29"
+        },
+        "type": "array"
+      },
+      "__schema36": {
+        "items": {
+          "$ref": "#/$defs/__schema29"
+        },
+        "type": "array"
+      },
+      "__schema37": {
+        "items": {
+          "$ref": "#/$defs/__schema33"
+        },
+        "type": "array"
+      },
+      "__schema38": {
+        "type": "boolean"
+      },
+      "__schema39": {
+        "additionalProperties": false,
+        "properties": {
+          "filesystem_after": {
+            "$ref": "#/$defs/__schema48"
+          },
+          "filesystem_before": {
+            "$ref": "#/$defs/__schema48"
+          },
+          "normalized_terminal": {
+            "$ref": "#/$defs/__schema47",
+            "description": "UTF-8 bytes of normalized raw-chunk text retained under output_bytes; omitted frames can have unknown final size when normalization exceeded an intermediate bound."
+          },
+          "process": {
+            "additionalProperties": false,
+            "properties": {
+              "coverage": {
+                "const": "sampled",
+                "type": "string"
+              },
+              "first_sampling_failure": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "retained_samples": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sample_limit": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sample_limit_reached": {
+                "type": "boolean"
+              },
+              "sampling_failures": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sampling_partial": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "sample_limit",
+              "sampling_partial",
+              "retained_samples",
+              "sample_limit_reached",
+              "sampling_failures",
+              "first_sampling_failure",
+              "coverage"
+            ],
+            "type": "object"
+          },
+          "raw_terminal": {
+            "$ref": "#/$defs/__schema46",
+            "description": "UTF-8 bytes of original PTY chunks; whole chunks are retained or omitted."
+          },
+          "rendered_terminal": {
+            "$ref": "#/$defs/__schema46",
+            "description": "Cumulative UTF-8 bytes of serialized state plus visible lines, evaluated from retained PTY input; whole frames are retained or omitted. When normalization exceeds a bound before the frame size is known, observed_bytes contains the exact total for size-known frames and unknown_size_frames counts the other omissions."
+          }
+        },
+        "required": [
+          "raw_terminal",
+          "rendered_terminal",
+          "filesystem_before",
+          "filesystem_after",
+          "process"
+        ],
+        "type": "object"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema40": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema41": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema42": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema43": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema44": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema45": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema46": {
+        "additionalProperties": false,
+        "properties": {
+          "budget_bytes": {
+            "$ref": "#/$defs/__schema40"
+          },
+          "observed_bytes": {
+            "$ref": "#/$defs/__schema41"
+          },
+          "observed_frames": {
+            "$ref": "#/$defs/__schema43"
+          },
+          "retained_bytes": {
+            "$ref": "#/$defs/__schema42"
+          },
+          "retained_frames": {
+            "$ref": "#/$defs/__schema44"
+          },
+          "unknown_size_frames": {
+            "$ref": "#/$defs/__schema45"
+          }
+        },
+        "required": [
+          "budget_bytes",
+          "observed_bytes",
+          "retained_bytes",
+          "observed_frames",
+          "retained_frames"
+        ],
+        "type": "object"
+      },
+      "__schema47": {
+        "additionalProperties": false,
+        "properties": {
+          "budget_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "omitted_frames": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "retained_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "budget_bytes",
+          "retained_bytes",
+          "omitted_frames"
+        ],
+        "type": "object"
+      },
+      "__schema48": {
+        "additionalProperties": false,
+        "properties": {
+          "depth_limit": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "enumeration_omissions": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "reason": {
+                  "const": "directory_unavailable",
+                  "type": "string"
+                },
+                "system_code": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "reason",
+                "system_code"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "enumeration_reasons": {
+            "items": {
+              "enum": [
+                "files_limit",
+                "depth_limit",
+                "identity_changed",
+                "directory_unavailable"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enumeration_truncated": {
+            "type": "boolean"
+          },
+          "files_limit": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "hash_budget_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "hash_omissions": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "reason": {
+                  "enum": [
+                    "file_bytes_budget",
+                    "file_changed_or_short_read",
+                    "file_unavailable"
+                  ],
+                  "type": "string"
+                },
+                "remaining_budget_bytes": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "size_bytes": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "system_code": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "size_bytes",
+                "remaining_budget_bytes",
+                "reason",
+                "system_code"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "hashed_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files_limit",
+          "depth_limit",
+          "enumeration_truncated",
+          "enumeration_reasons",
+          "enumeration_omissions",
+          "hash_budget_bytes",
+          "hashed_bytes",
+          "hash_omissions"
+        ],
+        "type": "object"
+      },
+      "__schema49": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema50": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "scope": {
+              "enum": [
+                "terminal",
+                "interaction",
+                "exit",
+                "process",
+                "filesystem",
+                "cleanup",
+                "network",
+                "environment"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "scope",
+            "reason"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema51": {
+        "additionalProperties": false,
+        "properties": {
+          "owned_process_group": {
+            "const": "verified",
+            "type": "string"
+          },
+          "temporary_root": {
+            "const": "removed",
+            "type": "string"
+          },
+          "unverified_processes": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "pid": {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pid",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "owned_process_group",
+          "temporary_root"
+        ],
+        "type": "object"
+      },
+      "__schema52": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema53": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema54": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema55": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema56": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema57"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema57"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema59"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema60"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema57"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema60"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema57": {
+        "items": {
+          "$ref": "#/$defs/__schema58"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema58": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema59": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema60": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema61"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema62"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema63"
+              },
+              {
+                "$ref": "#/$defs/__schema64"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema61": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema62": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema63": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema64": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema65": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema66": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:120990e41e0bf7599459af549f26d7e03c0e64a46f151c23af1fd8d1129b906a",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema53"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema52"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema54"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema66"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema55"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema65"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema14"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema56"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": true,
+  "title": "Capture Process Scenario"
+}

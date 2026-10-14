@@ -1,0 +1,1076 @@
+{
+  "analysisOperation": "inspect_signal_decoders",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Discover installed sigrok protocol decoders or inspect one decoder's channel/option help on Linux. Omit decoder to list ID/name pairs; supply its exact ID for literal help lines with source line numbers. query is a case-insensitive literal substring. Page matches with offset/limit (default 50; null returns all remaining). Reports tool identity, version, diagnostics and examined/matching coverage. Uses configured REA_SIGROK_COMMAND and prlimit; no recording, binary target, hardware scan or acquisition. Each call probes again; decoder modules are trusted, not fully fingerprinted. Use returned IDs/options with decode_signal_recording.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "default": null,
+        "description": "Exact installed decoder ID for help; null searches the decoder catalog"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9_+\\x2d]+$",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema2": {
+        "$ref": "#/$defs/__schema3",
+        "default": "",
+        "description": "Case-insensitive literal substring in decoder ID/name or help lines; empty selects all"
+      },
+      "__schema3": {
+        "maxLength": 8192,
+        "type": "string"
+      },
+      "__schema4": {
+        "$ref": "#/$defs/__schema5",
+        "default": 0,
+        "description": "Number of matching decoders or help lines to skip; defaults to 0"
+      },
+      "__schema5": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema6": {
+        "$ref": "#/$defs/__schema7",
+        "default": 50,
+        "description": "Maximum matching decoders or help lines returned; null requests all remaining"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "query": "uart"
+      },
+      {
+        "decoder": "uart",
+        "query": "baud"
+      }
+    ],
+    "properties": {
+      "decoder": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Exact installed decoder ID for help; null searches the decoder catalog"
+      },
+      "limit": {
+        "$ref": "#/$defs/__schema6",
+        "description": "Maximum matching decoders or help lines returned; null requests all remaining"
+      },
+      "offset": {
+        "$ref": "#/$defs/__schema4",
+        "description": "Number of matching decoders or help lines to skip; defaults to 0"
+      },
+      "query": {
+        "$ref": "#/$defs/__schema2",
+        "description": "Case-insensitive literal substring in decoder ID/name or help lines; empty selects all"
+      }
+    },
+    "type": "object"
+  },
+  "kind": "artifact-provider",
+  "name": "inspect_signal_decoders",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "decoders": {
+            "$ref": "#/$defs/__schema19"
+          },
+          "diagnostics": {
+            "$ref": "#/$defs/__schema22"
+          },
+          "hardware_acquisition": {
+            "$ref": "#/$defs/__schema26"
+          },
+          "help_lines": {
+            "$ref": "#/$defs/__schema20"
+          },
+          "limits": {
+            "$ref": "#/$defs/__schema25"
+          },
+          "output_window": {
+            "$ref": "#/$defs/__schema21"
+          },
+          "resource_limiter": {
+            "$ref": "#/$defs/__schema24"
+          },
+          "selection": {
+            "$ref": "#/$defs/__schema14"
+          },
+          "tool": {
+            "$ref": "#/$defs/__schema23"
+          }
+        },
+        "required": [
+          "selection",
+          "decoders",
+          "help_lines",
+          "output_window",
+          "diagnostics",
+          "tool",
+          "resource_limiter",
+          "limits",
+          "hardware_acquisition"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "additionalProperties": false,
+        "properties": {
+          "decoder": {
+            "$ref": "#/$defs/__schema15",
+            "default": null,
+            "description": "Exact installed decoder ID for help; null searches the decoder catalog"
+          },
+          "limit": {
+            "$ref": "#/$defs/__schema18",
+            "default": 50,
+            "description": "Maximum matching decoders or help lines returned; null requests all remaining"
+          },
+          "offset": {
+            "$ref": "#/$defs/__schema17",
+            "default": 0,
+            "description": "Number of matching decoders or help lines to skip; defaults to 0"
+          },
+          "query": {
+            "$ref": "#/$defs/__schema16",
+            "default": "",
+            "description": "Case-insensitive literal substring in decoder ID/name or help lines; empty selects all"
+          }
+        },
+        "required": [
+          "decoder",
+          "query",
+          "offset",
+          "limit"
+        ],
+        "type": "object"
+      },
+      "__schema15": {
+        "anyOf": [
+          {
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9_+\\x2d]+$",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema16": {
+        "maxLength": 8192,
+        "type": "string"
+      },
+      "__schema17": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema18": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema19": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "line_number": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "line_number",
+            "text"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema21": {
+        "additionalProperties": false,
+        "properties": {
+          "examined": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "matching": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "returned": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "unit": {
+            "enum": [
+              "decoders",
+              "help-lines"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "unit",
+          "examined",
+          "matching",
+          "returned",
+          "has_more"
+        ],
+        "type": "object"
+      },
+      "__schema22": {
+        "type": "string"
+      },
+      "__schema23": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "configured_path": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "version_banner": {
+            "type": "string"
+          },
+          "version_diagnostics": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured_path",
+          "path",
+          "sha256",
+          "version_banner",
+          "version_diagnostics",
+          "arguments"
+        ],
+        "type": "object"
+      },
+      "__schema24": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "configured_path": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured_path",
+          "path",
+          "sha256",
+          "arguments"
+        ],
+        "type": "object"
+      },
+      "__schema25": {
+        "additionalProperties": false,
+        "properties": {
+          "address_space_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "command_timeout_ms": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "cpu_seconds": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "file_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "input_bytes": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "output_bytes": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "input_bytes",
+          "output_bytes",
+          "command_timeout_ms",
+          "address_space_bytes",
+          "file_bytes",
+          "cpu_seconds"
+        ],
+        "type": "object"
+      },
+      "__schema26": {
+        "const": "not-performed",
+        "type": "string"
+      },
+      "__schema27": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema28": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema29": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema31": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema32"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema32"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema34"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema35"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema32"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema35"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema32": {
+        "items": {
+          "$ref": "#/$defs/__schema33"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema33": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema34": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema35": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema36"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema37"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema38"
+              },
+              {
+                "$ref": "#/$defs/__schema39"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema36": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema37": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema38": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema39": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema40": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema41": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:dd3025069bbf0b70e2d7e59b889f668c6d3310fb4b82533b0aa63d5c7f9ee11e",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema28"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema27"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema29"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema41"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema30"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema40"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema13"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema31"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Inspect Signal Decoders"
+}

@@ -1,0 +1,189 @@
+{
+  "analysisOperation": "start_frida_session",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Attach Frida to one selected process or spawn one selected target. Spawned targets remain paused until resume_frida_session, allowing scripts to load before execution. Closing a session detaches instrumentation; it does not kill the target.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": true,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "enum": [
+          "attach",
+          "spawn"
+        ],
+        "type": "string"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "certificate": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "keepalive_interval": {
+            "description": "Remote keepalive interval in seconds",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "origin": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "token": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "address"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+      },
+      "__schema4": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema5": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "device_id": "local",
+        "mode": "attach",
+        "pid": 1234
+      }
+    ],
+    "properties": {
+      "argv": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "device_id": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "mode": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Operation mode that selects the requested behavior."
+      },
+      "pid": {
+        "$ref": "#/$defs/__schema3"
+      },
+      "program": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "remote": {
+        "$ref": "#/$defs/__schema2"
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "start_frida_session",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema4": {
+        "enum": [
+          "attach",
+          "spawn"
+        ],
+        "type": "string"
+      },
+      "__schema5": {
+        "enum": [
+          "paused",
+          "running",
+          "detached"
+        ],
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:c566a9db171b4f886a8b7b8a85f3da8b7dbd517a89f88c18847ff4d03513d67a",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "device_id": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "mode": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "pid": {
+        "$ref": "#/$defs/__schema3"
+      },
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "state": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "target": {
+        "$ref": "#/$defs/__schema2"
+      }
+    },
+    "required": [
+      "session_id",
+      "device_id",
+      "target",
+      "pid",
+      "mode",
+      "state"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Start Frida Session"
+}

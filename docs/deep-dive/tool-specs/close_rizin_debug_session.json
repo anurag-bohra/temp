@@ -1,0 +1,71 @@
+{
+  "analysisOperation": "close_rizin_debug_session",
+  "annotations": {
+    "destructiveHint": true,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Close the REA-owned Rizin debugger only after verifying no inferior remains or detaching one with a verified caller-selected TTY output sink. A detached target may continue running and write to that TTY; target state is otherwise reported as unknown. REA never signals an inferior based on PID or path. In a shared MCP server, this admitted close retires any active binary-analysis session; after target effects have settled, call open_binary before further analysis. Close an active Ghidra session explicitly first.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": true,
+    "idempotent": true,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": true,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "session_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "properties": {
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "close_rizin_debug_session",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "const": "unknown",
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:e2c6c6030624997299f95a12c8e458ee13ecaf0a766543f383e2cf0a497daf85",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "target_state": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "target_state"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Close Rizin Debug Session"
+}

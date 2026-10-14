@@ -1,0 +1,120 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false,
+    "readOnlyHint": false
+  },
+  "description": "Drain earlier provider requests, optionally write a provider-neutral analysis snapshot atomically to the caller-supplied path, then close the active target and every provider resource started for it. Later provider requests wait until this lifecycle operation finishes. Existing files require explicit overwrite; a failed save leaves the session open so cached analysis is not lost. Metadata edits prevent immutable snapshot saves until the session is recreated; export_evidence_bundle preserves mutable observations before closing without a snapshot.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": false,
+    "launchesProcess": false,
+    "mayDiscardData": true,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "description": "Absolute local filesystem path for the analysis snapshot; relative paths are rejected.",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema1": {
+        "default": false,
+        "type": "boolean"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "overwrite": false
+      }
+    ],
+    "properties": {
+      "overwrite": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Whether an existing destination may be replaced."
+      },
+      "snapshot_path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Absolute local filesystem path for the analysis snapshot; relative paths are rejected."
+      }
+    },
+    "type": "object"
+  },
+  "kind": "session",
+  "name": "close_binary",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "bytes": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "evidence_records": {
+                "description": "All retained Evidence records, including observations without replay bindings.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "path": {
+                "type": "string"
+              },
+              "primitive_entries": {
+                "description": "Retained eligible primitive query bindings.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "workflow_entries": {
+                "description": "Retained eligible composed workflow bindings.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "bytes",
+              "primitive_entries",
+              "workflow_entries",
+              "evidence_records"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:8a32f576cedd988969146e42aca5272425f25e92c028d49091ce857dea07d12f",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "result": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "type": "object"
+  },
+  "requiresSession": true,
+  "title": "Close Binary"
+}

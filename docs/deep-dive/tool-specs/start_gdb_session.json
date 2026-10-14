@@ -1,0 +1,82 @@
+{
+  "analysisOperation": "start_gdb_session",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Start a BYO GDB process in MI3 mode when available, suppress startup files, and disable auto-loading. Persistent GDB sessions are available only on Linux, where REA can verify live inferior output descriptors through /proc before detaching; macOS descriptor verification is not implemented, and Windows Job Object cleanup can terminate debugger inferiors. Optionally set inferior_tty to a caller-selected terminal for future inferior runs; REA verifies the setting through GDB/MI before the session becomes ready. The selected terminal must remain available after GDB exits. A live inferior can be detached during close only while this durable output sink remains verified. The session persists in this REA MCP server process and receives an explicit session ID.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Caller-selected terminal path for future inferior runs. GDB must report the exact configured path before the session is ready."
+      },
+      "__schema1": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {}
+    ],
+    "properties": {
+      "inferior_tty": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Caller-selected terminal path for future inferior runs. GDB must report the exact configured path before the session is ready."
+      }
+    },
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "start_gdb_session",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema1": {
+        "enum": [
+          "mi3",
+          "mi2"
+        ],
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:991ebc84bc1736a1e68bc5f85be4fefb4d71397a7fbd153a5171d9ea9765f72d",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "mi_version": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id",
+      "mi_version"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Start Gdb Session"
+}

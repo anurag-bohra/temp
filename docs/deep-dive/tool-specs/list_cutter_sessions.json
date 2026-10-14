@@ -1,0 +1,141 @@
+{
+  "analysisOperation": "list_cutter_sessions",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "List live REA bridge sessions hosted by upstream Cutter instances, including observed document identity and bridge-directory security status. Discovery admits at most 256 descriptor candidates (16 MiB at the descriptor byte limit), reads and probes at most eight concurrently, and reports bridge_directory_capacity_exceeded rather than claiming no sessions when that budget is exceeded.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": false,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": false,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {}
+    ],
+    "properties": {},
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "list_cutter_sessions",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "current_file": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cutter_version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "document_generation": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "identity_status": {
+              "const": "partial",
+              "type": "string"
+            },
+            "pid": {
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "session_id": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "session_id",
+            "pid",
+            "document_generation",
+            "current_file",
+            "cutter_version",
+            "identity_status"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "enum": [
+          "sessions_found",
+          "no_live_bridge_found",
+          "bridge_directory_unavailable",
+          "bridge_directory_insecure",
+          "bridge_directory_capacity_exceeded"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "private_verified",
+          "not_private",
+          "unverified_platform_acl",
+          "not_checked"
+        ],
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:63ee52979df285ed028ba5fdb5b52a96c2c5cfb566edbf7f6a1f36eabdf36aaf",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "bridge_directory": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "bridge_directory_security": {
+        "$ref": "#/$defs/__schema3"
+      },
+      "discovery_status": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "sessions": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "sessions",
+      "bridge_directory",
+      "discovery_status",
+      "bridge_directory_security"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "List Cutter Sessions"
+}

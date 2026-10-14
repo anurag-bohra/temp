@@ -1,0 +1,1145 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Recover readable modules from local UTF-8 JavaScript scripts/bundles into an absent directory, using caller-supplied Wakaru ^1.13.0 (verified with 1.14.0) on Linux x64. Use additional_paths for related chunks; each input retains its own snapshot and provenance. Returns original/derived digests, extraction byte ranges, emitted source maps, warnings and analysis_input inline. Structural splitting may fall back to one module; original names and runtime equivalence remain unknown. No application code execution. Requires util-linux prlimit; one worker, 1 GiB address-space ceiling, 120-second deadline, 64 MiB total input, 128 MiB output, 10000 entries and 8 MiB per diagnostic/report stream.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute path to a UTF-8 JavaScript file; never executed"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema2": {
+        "$ref": "#/$defs/__schema3",
+        "description": "Additional absolute UTF-8 JavaScript files recovered together with path; each is snapshotted separately so imports can resolve across related chunks. All inputs share a 64 MiB total budget"
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "maxItems": 16,
+        "type": "array"
+      },
+      "__schema4": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute absent output directory; parent must exist"
+      },
+      "__schema5": {
+        "$ref": "#/$defs/__schema6",
+        "default": "structural",
+        "description": "Structural module boundaries, heuristic fallback, or finer inspection-only regions"
+      },
+      "__schema6": {
+        "enum": [
+          "structural",
+          "heuristic",
+          "inspection"
+        ],
+        "type": "string"
+      },
+      "__schema7": {
+        "$ref": "#/$defs/__schema8",
+        "default": "standard",
+        "description": "Upstream syntax recovery level; runtime equivalence remains unverified"
+      },
+      "__schema8": {
+        "enum": [
+          "minimal",
+          "standard",
+          "aggressive"
+        ],
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "output_directory": "/tmp/recovered-app",
+        "path": "/tmp/web-scripts/app.js"
+      },
+      {
+        "additional_paths": [
+          "/tmp/web-scripts/runtime.js",
+          "/tmp/web-scripts/shared.js",
+          "/tmp/web-scripts/checkout.chunk.js"
+        ],
+        "output_directory": "/tmp/recovered-chunks",
+        "path": "/tmp/web-scripts/main.js"
+      }
+    ],
+    "properties": {
+      "additional_paths": {
+        "$ref": "#/$defs/__schema2",
+        "description": "Additional absolute UTF-8 JavaScript files recovered together with path; each is snapshotted separately so imports can resolve across related chunks. All inputs share a 64 MiB total budget"
+      },
+      "extraction_mode": {
+        "$ref": "#/$defs/__schema5",
+        "description": "Structural module boundaries, heuristic fallback, or finer inspection-only regions"
+      },
+      "output_directory": {
+        "$ref": "#/$defs/__schema4",
+        "description": "Absolute absent output directory; parent must exist"
+      },
+      "path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Absolute path to a UTF-8 JavaScript file; never executed"
+      },
+      "rewrite_level": {
+        "$ref": "#/$defs/__schema7",
+        "description": "Upstream syntax recovery level; runtime equivalence remains unverified"
+      }
+    },
+    "required": [
+      "path",
+      "output_directory"
+    ],
+    "type": "object"
+  },
+  "kind": "application",
+  "name": "recover_javascript_sources",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "additional_sources": {
+            "items": {
+              "$ref": "#/$defs/__schema14"
+            },
+            "type": "array"
+          },
+          "analysis_input": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "format": {
+                    "const": "directory",
+                    "type": "string"
+                  },
+                  "input_path": {
+                    "$ref": "#/$defs/__schema5",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "input_path",
+                  "format"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "detected_formats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "engine": {
+            "additionalProperties": false,
+            "properties": {
+              "audited_source_revision": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "executable": {
+                "$ref": "#/$defs/__schema17"
+              },
+              "executed_source_revision": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "version": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "version",
+              "executable",
+              "audited_source_revision",
+              "executed_source_revision"
+            ],
+            "type": "object"
+          },
+          "failed": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "manifest": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "modules": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "artifact": {
+                  "$ref": "#/$defs/__schema17"
+                },
+                "provenance": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "byte_ranges": {
+                      "items": {
+                        "$ref": "#/$defs/__schema18"
+                      },
+                      "type": "array"
+                    },
+                    "context_byte_ranges": {
+                      "items": {
+                        "$ref": "#/$defs/__schema18"
+                      },
+                      "type": "array"
+                    },
+                    "extraction": {
+                      "type": "string"
+                    },
+                    "original_path": {
+                      "type": "string"
+                    },
+                    "original_sha256": {
+                      "$ref": "#/$defs/__schema4"
+                    },
+                    "range_semantics": {
+                      "const": "half-open-utf8-bytes",
+                      "type": "string"
+                    },
+                    "reported_input": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "reported_input",
+                    "original_path",
+                    "original_sha256",
+                    "extraction",
+                    "byte_ranges",
+                    "context_byte_ranges",
+                    "range_semantics"
+                  ],
+                  "type": "object"
+                },
+                "reported_filename": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "reported_status": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "source_map": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema17"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "reported_filename",
+                "reported_status",
+                "artifact",
+                "source_map",
+                "provenance"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "options": {
+            "additionalProperties": false,
+            "properties": {
+              "extraction_mode": {
+                "enum": [
+                  "structural",
+                  "heuristic",
+                  "inspection"
+                ],
+                "type": "string"
+              },
+              "rewrite_level": {
+                "enum": [
+                  "minimal",
+                  "standard",
+                  "aggressive"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "extraction_mode",
+              "rewrite_level"
+            ],
+            "type": "object"
+          },
+          "provenance": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "report": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "reported_format": {
+            "type": "string"
+          },
+          "reported_safety": {
+            "type": "string"
+          },
+          "reported_strategy": {
+            "type": "string"
+          },
+          "runtime_equivalence": {
+            "const": "unknown",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/__schema14"
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "partial"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "filename": {
+                  "type": "string"
+                },
+                "is_error": {
+                  "type": "boolean"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filename",
+                "kind",
+                "is_error",
+                "message"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "engine",
+          "options",
+          "status",
+          "detected_formats",
+          "reported_safety",
+          "reported_strategy",
+          "reported_format",
+          "total",
+          "failed",
+          "modules",
+          "warnings",
+          "report",
+          "provenance",
+          "manifest",
+          "analysis_input",
+          "runtime_equivalence",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "$ref": "#/$defs/__schema16"
+          },
+          "path": {
+            "$ref": "#/$defs/__schema15"
+          },
+          "published_copy": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          },
+          "snapshot_path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "bytes",
+          "snapshot_path",
+          "published_copy"
+        ],
+        "type": "object"
+      },
+      "__schema15": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema16": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema17": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "$ref": "#/$defs/__schema16"
+          },
+          "path": {
+            "$ref": "#/$defs/__schema15"
+          },
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "__schema18": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "start": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "type": "object"
+      },
+      "__schema19": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema21": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema22": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema23": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema24"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema24"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema26"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema27"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema24"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema27"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema24": {
+        "items": {
+          "$ref": "#/$defs/__schema25"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema25": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema26": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema27": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema28"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema29"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema30"
+              },
+              {
+                "$ref": "#/$defs/__schema31"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema28": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema29": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema31": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema32": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema33": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:08482d685ae809df6ef31f278fa76ad9ee694a1e511e5fbc90d113200e6dc648",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema20"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema19"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema21"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema33"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema22"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema32"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema13"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema23"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Recover Javascript Sources"
+}

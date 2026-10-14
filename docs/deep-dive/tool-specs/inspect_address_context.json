@@ -1,0 +1,219 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false,
+    "readOnlyHint": false
+  },
+  "description": "Inspect one explicit reproducible address for its analyzed name, containing procedure, regular and inline comments, and matching bookmarks. Each unsupported facet returns a typed unavailable outcome; use xrefs, assembly, or pseudocode for those deeper views.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": false,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "address": "0x1000"
+      }
+    ],
+    "properties": {
+      "address": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "document": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Exact provider document or program identity."
+      }
+    },
+    "required": [
+      "address"
+    ],
+    "type": "object"
+  },
+  "kind": "session",
+  "name": "inspect_address_context",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "bookmarks": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "state": {
+                    "const": "available",
+                    "type": "string"
+                  },
+                  "value": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "address": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "address",
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "state",
+                  "value"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  },
+                  "remediation": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "const": "unavailable",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "state",
+                  "reason",
+                  "remediation"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "comment": {
+            "$ref": "#/$defs/__schema1"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inline_comment": {
+            "$ref": "#/$defs/__schema1"
+          },
+          "name": {
+            "$ref": "#/$defs/__schema1"
+          },
+          "procedure": {
+            "$ref": "#/$defs/__schema1"
+          }
+        },
+        "required": [
+          "address",
+          "document",
+          "name",
+          "procedure",
+          "comment",
+          "inline_comment",
+          "bookmarks"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "state": {
+                "const": "available",
+                "type": "string"
+              },
+              "value": {}
+            },
+            "required": [
+              "state",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "remediation": {
+                "type": "string"
+              },
+              "state": {
+                "const": "unavailable",
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "reason",
+              "remediation"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:2a9a4369a20edcadc9811182deb9e469cbf4d675a1677736a4ab3b85cd322df7",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "result": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "type": "object"
+  },
+  "requiresSession": true,
+  "title": "Inspect Address Context"
+}

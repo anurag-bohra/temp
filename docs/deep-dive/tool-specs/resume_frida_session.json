@@ -1,0 +1,71 @@
+{
+  "analysisOperation": "resume_frida_session",
+  "annotations": {
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Resume the process created by a paused Frida spawn session. Attached processes are already running and cannot be resumed through this operation.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": true,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": true,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "session_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "properties": {
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "resume_frida_session",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "const": "running",
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:c90aefb7ce07c925fce9209d5326cad370c70102deaa50f69c91849f630f091d",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "state": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "state"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Resume Frida Session"
+}

@@ -1,0 +1,121 @@
+{
+  "analysisOperation": "rizin_debug_session_status",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false,
+    "readOnlyHint": false
+  },
+  "description": "Return observed lifecycle state and bounded recent NUL-framed output and process diagnostics for one Rizin debugger session; truncation fields report discarded data, and output_invalid_utf8 reports whether invalid UTF-8 has been observed in session frame bytes; recent output may contain replacement characters.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": false,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "session_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "properties": {
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "rizin_debug_session_status",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema1": {
+        "enum": [
+          "ready",
+          "closed"
+        ],
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema4": {
+        "type": "boolean"
+      },
+      "__schema5": {
+        "type": "boolean"
+      },
+      "__schema6": {
+        "type": "boolean"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:fb559ca762fce9a45774d45f34a89290b5c7cb21156c8336250a316c8010321f",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "diagnostics_truncated": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "inferior_tty": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "output_invalid_utf8": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "recent_output": {
+        "$ref": "#/$defs/__schema3"
+      },
+      "recent_output_truncated": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "state": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "session_id",
+      "state",
+      "inferior_tty",
+      "recent_output",
+      "recent_output_truncated",
+      "diagnostics_truncated",
+      "output_invalid_utf8"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Rizin Debug Session Status"
+}
