@@ -623,7 +623,7 @@ export const isSnapshotCacheable = (
 
 `binary_session` (MCP) "Report[s] the complete current target, provider, capability availability, client-feature, analysis, and server-identity status without starting analysis."
 
-Flow (`src/server/registerSessionStatusTool.ts:60-145`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
+Flow (`src/server/registerSessionStatusTool.ts:42-130`): probe Android/ADB/Apktool availability concurrently (owner probes, abortable) -> `session.status()` (`binarySessionStatus`) -> `buildCapabilityInventory(status, availabilityPolicy, clientFeatures)` -> `compactToolAvailability(...)` -> merge `client_features` and `server_identity`:
 
 ```ts
 const projectSessionStatus = (options: {...}) =>
@@ -635,9 +635,9 @@ const projectSessionStatus = (options: {...}) =>
   });
 ```
 
-(`registerSessionStatusTool.ts:~135-150`.)
+(`registerSessionStatusTool.ts:132-`; line cites corrected after verification.)
 
-### 6.1 `session.status()` projection (`BinarySessionStatus.ts:42-110`)
+### 6.1 `session.status()` projection (`BinarySessionStatus.ts:36-109`)
 
 Shape (derived from the code and the `sessionProvider` schema, `src/contracts/toolOutputSchemaPrimitives.ts:464-490`):
 
@@ -654,7 +654,7 @@ Shape (derived from the code and the `sessionProvider` schema, `src/contracts/to
 }
 ```
 
-(Constructed from the schema and projection code; the target summary fields come from `binaryTargetSummary`.) `providerCapabilitySets` (lines 188-244) **groups** operations of one provider that share `(effects, limitations-after-common-prefix, availability, reason, availability_code)` to keep the payload small; `commonLimitationsPrefix` factors the shared prefix into `shared_limitations`. The projection **omits the internal `inventory_artifact` operation** from capability lists. Runtime-unavailable operations are overlaid (`available: false, reason: "<tag>: <message>"`).
+(Constructed from the schema and projection code; the target summary fields come from `binaryTargetSummary`.) `providerCapabilitySets` (lines 213-281) **groups** operations of one provider that share `(effects, limitations-after-common-prefix, availability, reason, availability_code)` to keep the payload small; `commonLimitationsPrefix` factors the shared prefix into `shared_limitations`. The projection **omits the internal `inventory_artifact` operation** from capability lists. Runtime-unavailable operations are overlaid (`available: false, reason: "<tag>: <message>"`).
 
 ### 6.2 `buildCapabilityInventory` (`src/application/CapabilityInventory.ts`, 827 lines)
 
@@ -671,7 +671,7 @@ export const toolUnavailabilityReason = z.enum([
 ]);
 ```
 
-Decision procedure `availabilityFor` (lines ~273-300), in order:
+Decision procedure `availabilityFor` (lines 290-314), in order:
 
 1. two always-available browser observation workflows; `get_navigation_context` has its own two-mode logic (`current_selection` needs `current_document, current_address, resolve_containing_procedure`; `explicit_document` needs `current_address, resolve_containing_procedure`);
 2. `analyze_javascript_application` / `reconcile_javascript_runtime` always available;
