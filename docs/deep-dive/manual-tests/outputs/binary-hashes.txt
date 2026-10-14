@@ -1,0 +1,5 @@
+2c6c3a120fb39f849ccca2dcf95d92df41b130f5b002a5672474cd16340f4d75  /tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/rerun/work/go/beacon
+c9c84e1796426909070d7c09c2a8068b307dbc71bab0a0ddbe7441bbeae03684  /tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/rerun/work/c/t
+4928b3156d7537cf1a902949915ef434cad486c31859557d975e536a491ebbee  /tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/rerun/work/vuln/weak
+79fbb36370c8257499aeabfca36a1e66dd426e0c13a86a336707ac9688aa4e2c  /tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/rerun/work/vuln/hard
+3754b191dcc83f512d4f7964489ec0121a9ead5cce89b177b50f492cc3132f50  /tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/rerun/work/sample.zip

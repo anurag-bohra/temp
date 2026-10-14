@@ -23,17 +23,19 @@ Source: https://github.com/morluto/rea (HEAD `f75b1a4`, shallow clone, built loc
 | [23-defensive-malware-analysis-playbook.md](23-defensive-malware-analysis-playbook.md) | Risk tiers, 8 scenario tool-chains, sequence diagram, reuse plan, gaps | complete synthesis |
 | [24-porting-blueprints.md](24-porting-blueprints.md) | 13 liftable sub-tools with deps | concise synthesis |
 
-## Partial chapters (writers stopped early to save credits — treat as incomplete, unverified tail)
-| Chapter | Note |
-|---|---|
-| [04-cli-reference.md](04-cli-reference.md) | Likely missing family tables / side-effect tail; check before relying |
-| [05-setup-doctor-update-uninstall-clients.md](05-setup-doctor-update-uninstall-clients.md) | May be truncated |
-| [06-provider-layer-and-session-routing.md](06-provider-layer-and-session-routing.md), [07-hopper-provider.md](07-hopper-provider.md), [08-ghidra-provider.md](08-ghidra-provider.md) | Provider layer, Hopper, Ghidra |
-| [14-filetypes-native-apple-archives.md](14-filetypes-native-apple-archives.md) | Native/Apple/archive formats |
-| [16-javascript-electron-analysis.md](16-javascript-electron-analysis.md), [17-browser-and-web-observation.md](17-browser-and-web-observation.md) | JS/Electron, browser |
+## Chapters written by early-stopped writers (complete-looking, not spot-checked)
+04 CLI reference, 05 setup/clients, 06 provider layer, 07 Hopper, 08 Ghidra, 14 native/Apple/archive formats, 16 JS/Electron, 17 browser/web — each ends with its Porting notes section; citations not independently re-verified. See [29-pending-and-status.md](29-pending-and-status.md).
 
-## Not written
-25 is now the capabilities reference (no gaps chapter). Missing: 09 (IDA/Cutter/Rizin/GDB/objdump), 15 (.NET/firmware/WASM/EVM/misc formats), 18 (process capture/Frida), 19 (Android), 20 (pcap/signals), 21 (security model), 22 (end-to-end workflows; see 23 §6 and 12 §12.11 instead) — covered only by the tool catalog and the brief mentions above. Resume these if needed.
+## Added after review requests
+| Chapter | Abstract |
+|---|---|
+| [27-manual-test-log.md](27-manual-test-log.md) | Every manual test: environment, setup problems, samples, 11 test cases with real values, reproducibility, what was not tested; [manual-tests/](manual-tests/) holds script, samples, raw outputs |
+| [28-vulnerability-research-with-rea.md](28-vulnerability-research-with-rea.md) | Vuln-research flows: hardening triage, crash triage from a core, patch diffing, Electron attack surface, EVM selectors, source-to-sink; RUN vs DOC labelled |
+| [29-pending-and-status.md](29-pending-and-status.md) | Completion matrix, prioritised pending list, known discrepancies |
+| [30-subsystem-primers-and-architecture-glue.md](30-subsystem-primers-and-architecture-glue.md) | Short primers for subsystems without deep chapters + architecture/execution-authority diagrams |
+
+## Not written as deep dives
+09, 15, 18, 19, 20, 21, 22 — only primers in [30](30-subsystem-primers-and-architecture-glue.md); tools are still fully described in [25](25-capabilities-reference.md).
 
 ## Discrepancies found (code vs docs)
 - Attached CLAUDE.md predates the code (Hopper/Ghidra only vs 47 providers).
