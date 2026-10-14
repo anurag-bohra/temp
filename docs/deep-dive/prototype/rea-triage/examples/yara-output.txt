@@ -1,0 +1,12 @@
+demo_c2_like_elf c/t
+0x2004:$ip: 198.51.100.7
+0x54c:$a: ptrace
+0x3656:$a: ptrace
+0x579:$b: connect
+0x3680:$b: connect
+0x553:$c: dup2
+0x35f2:$c: dup2
+demo_electron_exec_bridge jsapp/src/main.js
+0x1ab:$h: ipcMain.handle
+0x57:$e: child_process
+0x1eb:$x: exec(

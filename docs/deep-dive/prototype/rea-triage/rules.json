@@ -1,0 +1,14 @@
+[
+  {"id":"R-NET-001","title":"Hard-coded network endpoint in code or data","tag":"command-and-control","severity":"medium","match":{"ioc_kinds":["url","ipv4"]}},
+  {"id":"R-EXEC-001","title":"Process creation API reachable","tag":"execution","severity":"medium","match":{"names_any":["Process::Start","Process.Start","exec","execve","vfork","fork","system","CreateProcess","ShellExecute","WinExec"]}},
+  {"id":"R-MEM-001","title":"Executable memory allocation (loader/shellcode pattern)","tag":"defense-evasion","severity":"high","match":{"names_any":["VirtualAlloc","VirtualAllocEx","mprotect","WriteProcessMemory","CreateRemoteThread"]}},
+  {"id":"R-ANTI-001","title":"Anti-debugging API","tag":"defense-evasion","severity":"medium","match":{"names_any":["ptrace","IsDebuggerPresent","CheckRemoteDebuggerPresent","NtQueryInformationProcess"]}},
+  {"id":"R-NET-002","title":"Socket / outbound connection API","tag":"command-and-control","severity":"medium","match":{"names_any":["connect","socket","inet_pton","WSAConnect","InternetOpen","HttpWebRequest","HttpClient","GetStringAsync","HttpURLConnection"]}},
+  {"id":"R-FD-001","title":"File descriptor redirection to socket (reverse-shell pattern)","tag":"execution","severity":"high","match":{"names_all":["dup2","connect"]}},
+  {"id":"R-OBF-001","title":"Base64 decode of configuration or payload","tag":"obfuscation","severity":"low","match":{"names_any":["FromBase64String","atob","b64decode"],"or_ioc_kinds":["base64-decoded"]}},
+  {"id":"R-MOB-001","title":"Premium SMS / SMS access permission","tag":"mobile-collection","severity":"high","match":{"permissions_any":["android.permission.SEND_SMS","android.permission.READ_SMS","android.permission.RECEIVE_SMS"]}},
+  {"id":"R-JS-001","title":"Renderer-to-main command execution bridge (Electron)","tag":"privilege-escalation","severity":"high","match":{"js_all":["ipc-handler","child-process","context-bridge-api"]}},
+  {"id":"R-JS-002","title":"Dynamic code evaluation of network-derived data (candidate)","tag":"execution","severity":"high","match":{"js_all":["request","eval-expression"]}},
+  {"id":"R-PE-001","title":"Embedded payload-like PE resource (RCDATA, non-icon)","tag":"payload-staging","severity":"medium","match":{"pe_rcdata":true}},
+  {"id":"R-HARD-001","title":"Weak binary hardening (no canary and executable stack)","tag":"vuln-surface","severity":"info","match":{"layout_weak":true}}
+]
