@@ -10,7 +10,7 @@ Source: https://github.com/morluto/rea (HEAD `f75b1a4`, shallow clone, built loc
 | [12-ai-layer-prompts-and-skills.md](12-ai-layer-prompts-and-skills.md) | Six guided prompts (verbatim + rendered), completion, chaining, sequence diagrams, porting to malware agents |
 | [12 part b](12-ai-layer-prompts-and-skills-part-b-bundled-skill-verbatim.md) | Bundled skill `SKILL.md` + 6 references, verbatim |
 | [12 part c](12-ai-layer-prompts-and-skills-part-c-repo-skills-and-llm-text.md) | Repo skills, AGENTS.md, tool-design, RE-tools guide, verbatim |
-| [26-tool-usage-in-context-malware-analyst-view.md](26-tool-usage-in-context-malware-analyst-view.md) | **Per-flow usage**: when each tool is called, what is extracted, how it is used next, caveats; real outputs from runs on demo samples (RUN vs DOC labelled); 11 flow diagrams |
+| [26-tool-usage-in-context-malware-analyst-view.md](26-tool-usage-in-context-malware-analyst-view.md) | **Per-flow usage**: when each tool is called, what is extracted, how it is used next, caveats; real outputs from runs on demo samples (RUN vs DOC labelled); 8 flow diagrams |
 | [25-capabilities-reference.md](25-capabilities-reference.md) | **Every capability in detail**: 18 families, 207 tools with verbatim agent-facing descriptions, tier, providers, CLI mapping, requirements, malware-analysis use; provider list |
 | [13-tool-catalog-index.md](13-tool-catalog-index.md), [catalog/](catalog/), [tool-specs/](tool-specs/) | All 207 tools: verbatim input schemas (catalog), full specs incl. output schemas (tool-specs), effects matrix |
 
