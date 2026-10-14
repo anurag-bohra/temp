@@ -1,0 +1,5 @@
+[{"tool":"open_binary","args":{"path":"/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/c/t","provider_id":"ghidra"},"timeout":600000},
+ {"tool":"binary_overview"},
+ {"tool":"list_procedures"},
+ {"tool":"search_strings","args":{"pattern":"198.51","mode":"literal"}},
+ {"tool":"list_strings"}]

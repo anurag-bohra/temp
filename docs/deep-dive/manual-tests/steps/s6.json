@@ -1,0 +1,5 @@
+[{"tool":"start_frida_session","args":{"device_id":"local","mode":"spawn","program":"/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/vuln/hard","argv":["/tmp/claude-0/-home-user-temp/b1154f5f-19b6-591b-8a67-cb57e20a5c77/scratchpad/samples/vuln/hard","hello"]}},
+ {"tool":"load_frida_script","args":{"session_id":"${session_id}","source_kind":"inline","source":"const f=Module.getGlobalExportByName('__printf_chk'); Interceptor.attach(f,{onEnter(a){send({printf_fmt:a[1].readUtf8String(), arg:a[2].readUtf8String()});}}); send('hooked');"}},
+ {"tool":"resume_frida_session","args":{"session_id":"${session_id}"},"sleep_ms":1500},
+ {"tool":"frida_session_status","args":{"session_id":"${session_id}"}},
+ {"tool":"close_frida_session","args":{"session_id":"${session_id}"}}]

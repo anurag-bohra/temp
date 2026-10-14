@@ -1,6 +1,6 @@
 # rea-triage (prototype of the malware-triage layer REA does not provide)
 
-A ~110-line, dependency-free Node script plus `rules.json` and `demo-rules.yar`. It consumes **REA Evidence** (CLI `--json` output or MCP transcripts) and adds the missing malware-oriented layer: IOC extraction (URLs, IPv4, base64-decoded configuration, embedded-resource hashes, toolchain facts), rule matching (ATT&CK-style tags, severity) and a Markdown/JSON report in which **every finding cites the originating Evidence ID**. It runs nothing and reads only files.
+A single-file, dependency-free Node script plus `rules.json` and `demo-rules.yar`. It consumes **REA Evidence** (CLI `--json` output or MCP transcripts) and adds the missing malware-oriented layer: IOC extraction (URLs, IPv4, base64-decoded configuration, embedded-resource hashes, toolchain facts), rule matching (ATT&CK-style tags, severity) and a Markdown/JSON report in which **every finding cites the originating Evidence ID**. It runs nothing and reads only files.
 
 ```
 node rea-triage.mjs rules.json <out-prefix> <evidence.json | mcp-transcript.json>...
