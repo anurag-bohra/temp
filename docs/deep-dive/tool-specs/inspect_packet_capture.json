@@ -1,0 +1,1237 @@
+{
+  "analysisOperation": "inspect_packet_capture",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Inspect caller-selected fields in an existing local packet capture with TShark 4.x. Return 50 matching frames by default, with match_offset/match_limit paging and coverage counts; match_limit:null requests all remaining matches. Preserve repeated values, frame numbers, display filter, decode-as rules and pass mode in inline Evidence with source/tool identity and diagnostics. Optional packet_limit counts input packets before filtering; output paging does not shorten dissection or two-pass reassembly. Requires Linux, util-linux prlimit, and absolute REA_TSHARK_COMMAND. File-only analysis; no live capture or device communication. Missing fields or no matches do not establish absence of device traffic.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "description": "Absolute local capture path",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema1": {
+        "description": "TShark field names to return, e.g. ip.addr, usb.endpoint_address, btatt.opcode; frame.number is always included",
+        "items": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "maxItems": 1024,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema11": {
+        "$ref": "#/$defs/__schema12",
+        "default": 0,
+        "description": "Skip this many matching packets after filtering; default 0"
+      },
+      "__schema12": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema13": {
+        "$ref": "#/$defs/__schema14",
+        "default": 50,
+        "description": "Return at most this many matching packets after filtering; default 50. Null explicitly returns all remaining matches within producer resource limits."
+      },
+      "__schema14": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema2": {
+        "maxLength": 8192,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "$ref": "#/$defs/__schema4",
+        "default": null,
+        "description": "Optional Wireshark display filter (-Y), applied within the read limit"
+      },
+      "__schema4": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/__schema2"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema5": {
+        "$ref": "#/$defs/__schema6",
+        "default": [],
+        "description": "Explicit TShark decode-as selections, e.g. tcp.port==8888,http"
+      },
+      "__schema6": {
+        "items": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "maxItems": 1024,
+        "type": "array"
+      },
+      "__schema7": {
+        "$ref": "#/$defs/__schema8",
+        "default": null,
+        "description": "Maximum input packets to read before filtering; omitted scans to EOF within resource limits"
+      },
+      "__schema8": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 2147483647,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema9": {
+        "$ref": "#/$defs/__schema10",
+        "default": true,
+        "description": "Use two-pass analysis for fields requiring later packets; false requests a single pass"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "decode_as": [],
+        "display_filter": "udp",
+        "fields": [
+          "ip.addr",
+          "udp.port",
+          "data.data"
+        ],
+        "packet_limit": null,
+        "path": "/artifacts/device.pcapng",
+        "two_pass": true
+      }
+    ],
+    "properties": {
+      "decode_as": {
+        "$ref": "#/$defs/__schema5",
+        "description": "Explicit TShark decode-as selections, e.g. tcp.port==8888,http"
+      },
+      "display_filter": {
+        "$ref": "#/$defs/__schema3",
+        "description": "Optional Wireshark display filter (-Y), applied within the read limit"
+      },
+      "fields": {
+        "$ref": "#/$defs/__schema1",
+        "description": "TShark field names to return, e.g. ip.addr, usb.endpoint_address, btatt.opcode; frame.number is always included"
+      },
+      "match_limit": {
+        "$ref": "#/$defs/__schema13",
+        "description": "Return at most this many matching packets after filtering; default 50. Null explicitly returns all remaining matches within producer resource limits."
+      },
+      "match_offset": {
+        "$ref": "#/$defs/__schema11",
+        "description": "Skip this many matching packets after filtering; default 0"
+      },
+      "packet_limit": {
+        "$ref": "#/$defs/__schema7",
+        "description": "Maximum input packets to read before filtering; omitted scans to EOF within resource limits"
+      },
+      "path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Absolute local capture path"
+      },
+      "two_pass": {
+        "$ref": "#/$defs/__schema9",
+        "description": "Use two-pass analysis for fields requiring later packets; false requests a single pass"
+      }
+    },
+    "required": [
+      "path",
+      "fields"
+    ],
+    "type": "object"
+  },
+  "kind": "artifact-provider",
+  "name": "inspect_packet_capture",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact": {
+            "$ref": "#/$defs/__schema14"
+          },
+          "configuration": {
+            "$ref": "#/$defs/__schema36"
+          },
+          "diagnostics": {
+            "$ref": "#/$defs/__schema34"
+          },
+          "hardware_acquisition": {
+            "$ref": "#/$defs/__schema39"
+          },
+          "limits": {
+            "$ref": "#/$defs/__schema38"
+          },
+          "output_window": {
+            "$ref": "#/$defs/__schema32"
+          },
+          "packets": {
+            "$ref": "#/$defs/__schema31"
+          },
+          "read_scope": {
+            "$ref": "#/$defs/__schema33"
+          },
+          "resource_limiter": {
+            "$ref": "#/$defs/__schema37"
+          },
+          "selection": {
+            "$ref": "#/$defs/__schema15"
+          },
+          "tool": {
+            "$ref": "#/$defs/__schema35"
+          }
+        },
+        "required": [
+          "artifact",
+          "selection",
+          "packets",
+          "output_window",
+          "read_scope",
+          "diagnostics",
+          "tool",
+          "configuration",
+          "resource_limiter",
+          "limits",
+          "hardware_acquisition"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "__schema15": {
+        "additionalProperties": false,
+        "properties": {
+          "decode_as": {
+            "$ref": "#/$defs/__schema21"
+          },
+          "display_filter": {
+            "$ref": "#/$defs/__schema19"
+          },
+          "fields": {
+            "$ref": "#/$defs/__schema17"
+          },
+          "match_limit": {
+            "$ref": "#/$defs/__schema29"
+          },
+          "match_offset": {
+            "$ref": "#/$defs/__schema27"
+          },
+          "packet_limit": {
+            "$ref": "#/$defs/__schema23"
+          },
+          "path": {
+            "$ref": "#/$defs/__schema16"
+          },
+          "two_pass": {
+            "$ref": "#/$defs/__schema25"
+          }
+        },
+        "required": [
+          "path",
+          "fields",
+          "display_filter",
+          "decode_as",
+          "packet_limit",
+          "two_pass",
+          "match_offset",
+          "match_limit"
+        ],
+        "type": "object"
+      },
+      "__schema16": {
+        "$ref": "#/$defs/__schema5",
+        "description": "Absolute local capture path",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema17": {
+        "description": "TShark field names to return, e.g. ip.addr, usb.endpoint_address, btatt.opcode; frame.number is always included",
+        "items": {
+          "$ref": "#/$defs/__schema18"
+        },
+        "maxItems": 1024,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema18": {
+        "maxLength": 8192,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema19": {
+        "$ref": "#/$defs/__schema20",
+        "default": null,
+        "description": "Optional Wireshark display filter (-Y), applied within the read limit"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/__schema18"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema21": {
+        "$ref": "#/$defs/__schema22",
+        "default": [],
+        "description": "Explicit TShark decode-as selections, e.g. tcp.port==8888,http"
+      },
+      "__schema22": {
+        "items": {
+          "$ref": "#/$defs/__schema18"
+        },
+        "maxItems": 1024,
+        "type": "array"
+      },
+      "__schema23": {
+        "$ref": "#/$defs/__schema24",
+        "default": null,
+        "description": "Maximum input packets to read before filtering; omitted scans to EOF within resource limits"
+      },
+      "__schema24": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 2147483647,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema25": {
+        "$ref": "#/$defs/__schema26",
+        "default": true,
+        "description": "Use two-pass analysis for fields requiring later packets; false requests a single pass"
+      },
+      "__schema26": {
+        "type": "boolean"
+      },
+      "__schema27": {
+        "$ref": "#/$defs/__schema28",
+        "default": 0,
+        "description": "Skip this many matching packets after filtering; default 0"
+      },
+      "__schema28": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema29": {
+        "$ref": "#/$defs/__schema30",
+        "default": 50,
+        "description": "Return at most this many matching packets after filtering; default 50. Null explicitly returns all remaining matches within producer resource limits."
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema31": {
+        "items": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "frame.number": {
+              "prefixItems": [
+                {
+                  "pattern": "^[1-9][0-9]*$",
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            }
+          },
+          "required": [
+            "frame.number"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema32": {
+        "additionalProperties": false,
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "matching_packets": {
+            "description": "Matches in the completed producer output within the indicated input read scope, not total capture packets",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "returned_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "matching_packets",
+          "returned_packets",
+          "has_more"
+        ],
+        "type": "object"
+      },
+      "__schema33": {
+        "enum": [
+          "to-eof",
+          "up-to-input-packet-limit"
+        ],
+        "type": "string"
+      },
+      "__schema34": {
+        "type": "string"
+      },
+      "__schema35": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "configured_path": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "version_banner": {
+            "type": "string"
+          },
+          "version_diagnostics": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured_path",
+          "path",
+          "sha256",
+          "version_banner",
+          "version_diagnostics",
+          "arguments"
+        ],
+        "type": "object"
+      },
+      "__schema36": {
+        "const": "private-empty-personal-profile",
+        "type": "string"
+      },
+      "__schema37": {
+        "additionalProperties": false,
+        "properties": {
+          "arguments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "configured_path": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured_path",
+          "path",
+          "sha256",
+          "arguments"
+        ],
+        "type": "object"
+      },
+      "__schema38": {
+        "additionalProperties": false,
+        "properties": {
+          "address_space_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "command_timeout_ms": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "cpu_seconds": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "file_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "input_bytes": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "output_bytes": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "input_bytes",
+          "output_bytes",
+          "command_timeout_ms",
+          "address_space_bytes",
+          "file_bytes",
+          "cpu_seconds"
+        ],
+        "type": "object"
+      },
+      "__schema39": {
+        "const": "not-performed",
+        "type": "string"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema40": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema41": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema42": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema43": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema44": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema45"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema45"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema47"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema48"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema45"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema48"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema45": {
+        "items": {
+          "$ref": "#/$defs/__schema46"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema46": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema47": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema48": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema49"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema50"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema51"
+              },
+              {
+                "$ref": "#/$defs/__schema52"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema49": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema50": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema51": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema52": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema53": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema54": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:e46872264eabe4cabbd5b7c1f50883988d8ade5058bcec1ae01826a53a5d1f60",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema41"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema40"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema42"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema54"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema43"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema53"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema13"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema44"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Inspect Packet Capture"
+}

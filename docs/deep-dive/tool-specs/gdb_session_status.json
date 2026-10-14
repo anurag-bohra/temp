@@ -1,0 +1,176 @@
+{
+  "analysisOperation": "gdb_session_status",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false,
+    "readOnlyHint": true
+  },
+  "description": "Return the observed lifecycle state and bounded recent MI records and process diagnostics for one persistent REA GDB session; truncation and invalid-UTF-8 fields report discarded or lossy data.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": false,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": false,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "session_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "properties": {
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "gdb_session_status",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema1": {
+        "enum": [
+          "mi3",
+          "mi2"
+        ],
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema11": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema12": {
+        "type": "boolean"
+      },
+      "__schema2": {
+        "enum": [
+          "ready",
+          "closed"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema4": {
+        "type": "boolean"
+      },
+      "__schema5": {
+        "type": "boolean"
+      },
+      "__schema6": {
+        "type": "string"
+      },
+      "__schema7": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema8": {
+        "type": "boolean"
+      },
+      "__schema9": {
+        "type": "boolean"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:1399bad88270f5f20ef29bc9a3bdf23c26ab94a3fff383379c63386184063176",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "diagnostics_truncated": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "inferior_tty": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "inferior_tty_verified": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "mi_invalid_utf8": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "mi_version": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "recent_mi_records": {
+        "$ref": "#/$defs/__schema3"
+      },
+      "recent_mi_records_truncated": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "state": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "stderr": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "stderr_invalid_utf8": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "stderr_observed_bytes": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "stderr_truncated": {
+        "$ref": "#/$defs/__schema8"
+      }
+    },
+    "required": [
+      "session_id",
+      "mi_version",
+      "state",
+      "recent_mi_records",
+      "recent_mi_records_truncated",
+      "mi_invalid_utf8",
+      "stderr",
+      "stderr_observed_bytes",
+      "stderr_truncated",
+      "stderr_invalid_utf8",
+      "diagnostics_truncated",
+      "inferior_tty",
+      "inferior_tty_verified"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Gdb Session Status"
+}

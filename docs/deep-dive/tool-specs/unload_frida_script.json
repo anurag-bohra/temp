@@ -1,0 +1,81 @@
+{
+  "analysisOperation": "unload_frida_script",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Unload one caller-selected Frida script from a live session. This removes that script's instrumentation from the target.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": true,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema1": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "script_id": "00000000-0000-4000-8000-000000000002",
+        "session_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "properties": {
+      "script_id": {
+        "$ref": "#/$defs/__schema1"
+      },
+      "session_id": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "session_id",
+      "script_id"
+    ],
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "unload_frida_script",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "const": true,
+        "type": "boolean"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:9040101797453673991b28389f4ff2adb5bd2a67541e52fa7ef00d8ffe2c5133",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "unloaded": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "unloaded"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Unload Frida Script"
+}

@@ -1,0 +1,1744 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Use this for a provider-owned Electron run when passive CDP or Inspector observation cannot exercise application behavior. REA owns startup and teardown, accepts caller-defined click/wait actions plus window-targeted renderer reload/crash and synthetic open-url/second-instance delivery, and returns correlated window/WebContents/process/preload/session/navigation/shell/IPC evidence without retaining payload values. Actions wait for completion or request cancellation; a missing click target can keep the request pending. Results identify observed and unavailable event families, coverage status, action targets, and truncation. Cleanup failures retain collected observations with explicit cleanup uncertainty. External shell, navigation, permission, download, popup, updater, and OS-integration effects are blocked and recorded. Use passive Electron tools for observation-only work.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": true,
+    "executesForeignCode": true,
+    "idempotent": false,
+    "launchesProcess": true,
+    "mayDiscardData": true,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": true,
+    "writesFilesystem": true
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute local filesystem path for the Electron executable; relative paths are rejected."
+      },
+      "__schema1": {
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema2": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute local filesystem path for the Electron application; relative paths are rejected."
+      },
+      "__schema3": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute local filesystem root for application-relative paths; omit to derive it from the application path. Relative paths are rejected."
+      },
+      "__schema4": {
+        "default": [],
+        "items": {
+          "pattern": "^[^\\x00]*$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema5": {
+        "default": [],
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "click",
+                  "type": "string"
+                },
+                "selector": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "step_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "window_index": {
+                  "$ref": "#/$defs/__schema6",
+                  "default": 0
+                }
+              },
+              "required": [
+                "step_id",
+                "kind",
+                "selector"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "duration_ms": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "wait",
+                  "type": "string"
+                },
+                "step_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "window_index": {
+                  "$ref": "#/$defs/__schema6"
+                }
+              },
+              "required": [
+                "step_id",
+                "kind",
+                "duration_ms"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "renderer-reload",
+                  "type": "string"
+                },
+                "step_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "window_index": {
+                  "$ref": "#/$defs/__schema6",
+                  "default": 0
+                }
+              },
+              "required": [
+                "step_id",
+                "kind"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "renderer-crash",
+                  "type": "string"
+                },
+                "step_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "window_index": {
+                  "$ref": "#/$defs/__schema6",
+                  "default": 0
+                }
+              },
+              "required": [
+                "step_id",
+                "kind"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "delivery": {
+                  "enum": [
+                    "open-url",
+                    "second-instance"
+                  ],
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "deep-link",
+                  "type": "string"
+                },
+                "step_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "url": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "step_id",
+                "kind",
+                "delivery",
+                "url"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema6": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "actions": [
+          {
+            "kind": "click",
+            "selector": "#run",
+            "step_id": "exercise-ipc"
+          }
+        ],
+        "application_path": "/Applications/Example.app/Contents/Resources/main.js",
+        "args": [],
+        "executable_path": "/Applications/Electron.app/Contents/MacOS/Electron"
+      }
+    ],
+    "properties": {
+      "actions": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "application_path": {
+        "$ref": "#/$defs/__schema2",
+        "description": "Absolute local filesystem path for the Electron application; relative paths are rejected."
+      },
+      "application_root": {
+        "$ref": "#/$defs/__schema3",
+        "description": "Absolute local filesystem root for application-relative paths; omit to derive it from the application path. Relative paths are rejected."
+      },
+      "args": {
+        "$ref": "#/$defs/__schema4"
+      },
+      "executable_path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Absolute local filesystem path for the Electron executable; relative paths are rejected."
+      }
+    },
+    "required": [
+      "executable_path",
+      "application_path"
+    ],
+    "type": "object"
+  },
+  "kind": "electron-provider",
+  "name": "capture_electron_scenario",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "items": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "elapsed_ms": {
+                      "$ref": "#/$defs/__schema19"
+                    },
+                    "error": {
+                      "type": "null"
+                    },
+                    "kind": {
+                      "$ref": "#/$defs/__schema16"
+                    },
+                    "status": {
+                      "const": "completed",
+                      "type": "string"
+                    },
+                    "step_id": {
+                      "$ref": "#/$defs/__schema15"
+                    },
+                    "target": {
+                      "$ref": "#/$defs/__schema18"
+                    },
+                    "window_index": {
+                      "$ref": "#/$defs/__schema17"
+                    }
+                  },
+                  "required": [
+                    "step_id",
+                    "kind",
+                    "window_index",
+                    "target",
+                    "elapsed_ms",
+                    "status",
+                    "error"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "elapsed_ms": {
+                      "$ref": "#/$defs/__schema19"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "$ref": "#/$defs/__schema16"
+                    },
+                    "status": {
+                      "enum": [
+                        "failed",
+                        "cancelled"
+                      ],
+                      "type": "string"
+                    },
+                    "step_id": {
+                      "$ref": "#/$defs/__schema15"
+                    },
+                    "target": {
+                      "$ref": "#/$defs/__schema18"
+                    },
+                    "window_index": {
+                      "$ref": "#/$defs/__schema17"
+                    }
+                  },
+                  "required": [
+                    "step_id",
+                    "kind",
+                    "window_index",
+                    "target",
+                    "elapsed_ms",
+                    "status",
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "application": {
+            "additionalProperties": false,
+            "properties": {
+              "application_path": {
+                "$ref": "#/$defs/__schema14"
+              },
+              "cleanup": {
+                "const": "terminated-owned-process",
+                "type": "string"
+              },
+              "electron_version": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "executable_path": {
+                "$ref": "#/$defs/__schema14"
+              },
+              "process_ownership": {
+                "const": "provider-owned",
+                "type": "string"
+              }
+            },
+            "required": [
+              "executable_path",
+              "application_path",
+              "electron_version",
+              "process_ownership",
+              "cleanup"
+            ],
+            "type": "object"
+          },
+          "coverage": {
+            "additionalProperties": false,
+            "properties": {
+              "observed_event_families": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "observed_roles": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "pre_capture_activity": {
+                "const": "unavailable",
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "complete",
+                  "partial_attach",
+                  "hook_conflict",
+                  "target_exited",
+                  "cleanup_failed"
+                ],
+                "type": "string"
+              },
+              "unavailable_event_families": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "status",
+              "observed_event_families",
+              "unavailable_event_families",
+              "observed_roles",
+              "pre_capture_activity"
+            ],
+            "type": "object"
+          },
+          "ipc": {
+            "additionalProperties": false,
+            "properties": {
+              "dropped": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "events": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "argument_shapes": {
+                      "$ref": "#/$defs/__schema30"
+                    },
+                    "artifact_path": {
+                      "$ref": "#/$defs/__schema35"
+                    },
+                    "artifact_sha256": {
+                      "$ref": "#/$defs/__schema36"
+                    },
+                    "capture_method": {
+                      "$ref": "#/$defs/__schema34"
+                    },
+                    "channel": {
+                      "$ref": "#/$defs/__schema24"
+                    },
+                    "correlation_id": {
+                      "$ref": "#/$defs/__schema21"
+                    },
+                    "direction": {
+                      "$ref": "#/$defs/__schema25"
+                    },
+                    "error": {
+                      "$ref": "#/$defs/__schema37"
+                    },
+                    "event": {
+                      "$ref": "#/$defs/__schema22"
+                    },
+                    "frame": {
+                      "$ref": "#/$defs/__schema28"
+                    },
+                    "kind": {
+                      "enum": [
+                        "main-handler-invocation",
+                        "main-event-invocation",
+                        "utility-process-fork",
+                        "utility-process-message",
+                        "ipc-main-to-renderer",
+                        "ipc-utility-to-main",
+                        "ipc-renderer-send",
+                        "ipc-renderer-invoke",
+                        "ipc-renderer-post-message"
+                      ],
+                      "type": "string"
+                    },
+                    "phase": {
+                      "$ref": "#/$defs/__schema23"
+                    },
+                    "process_type": {
+                      "$ref": "#/$defs/__schema32"
+                    },
+                    "receiver": {
+                      "$ref": "#/$defs/__schema27"
+                    },
+                    "result_shape": {
+                      "$ref": "#/$defs/__schema31"
+                    },
+                    "sender": {
+                      "$ref": "#/$defs/__schema26"
+                    },
+                    "sequence": {
+                      "$ref": "#/$defs/__schema20"
+                    },
+                    "source": {
+                      "$ref": "#/$defs/__schema33"
+                    },
+                    "target": {
+                      "$ref": "#/$defs/__schema29"
+                    }
+                  },
+                  "required": [
+                    "sequence",
+                    "correlation_id",
+                    "kind",
+                    "event",
+                    "phase",
+                    "channel",
+                    "direction",
+                    "sender",
+                    "receiver",
+                    "frame",
+                    "target",
+                    "argument_shapes",
+                    "result_shape",
+                    "process_type",
+                    "source",
+                    "capture_method",
+                    "artifact_path",
+                    "artifact_sha256",
+                    "error"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "observed": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "events",
+              "observed",
+              "dropped"
+            ],
+            "type": "object"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "processes": {
+            "additionalProperties": false,
+            "properties": {
+              "items": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "pid": {
+                      "maximum": 9007199254740991,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "service_name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "pid",
+                    "type",
+                    "name",
+                    "service_name"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "type": "object"
+          },
+          "retention": {
+            "additionalProperties": false,
+            "properties": {
+              "budget_bytes": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "dropped": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "dropped_event_families": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": {
+                      "maximum": 9007199254740991,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "family": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "family",
+                    "count"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "dropped_event_roles": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": {
+                      "maximum": 9007199254740991,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "role": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "count"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "dropped_ipc": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "dropped_runtime": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "estimated_retained_bytes": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "event_serialized_byte_upper_bound": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "observed_ipc": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "observed_runtime": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "retained": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "budget_bytes",
+              "estimated_retained_bytes",
+              "event_serialized_byte_upper_bound",
+              "retained",
+              "dropped",
+              "dropped_event_families",
+              "dropped_event_roles",
+              "observed_ipc",
+              "dropped_ipc",
+              "observed_runtime",
+              "dropped_runtime"
+            ],
+            "type": "object"
+          },
+          "timeline": {
+            "additionalProperties": false,
+            "properties": {
+              "dropped": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "events": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "argument_shapes": {
+                      "$ref": "#/$defs/__schema30"
+                    },
+                    "artifact_path": {
+                      "$ref": "#/$defs/__schema35"
+                    },
+                    "artifact_sha256": {
+                      "$ref": "#/$defs/__schema36"
+                    },
+                    "capture_method": {
+                      "$ref": "#/$defs/__schema34"
+                    },
+                    "channel": {
+                      "$ref": "#/$defs/__schema24"
+                    },
+                    "correlation_id": {
+                      "$ref": "#/$defs/__schema21"
+                    },
+                    "direction": {
+                      "$ref": "#/$defs/__schema25"
+                    },
+                    "error": {
+                      "$ref": "#/$defs/__schema37"
+                    },
+                    "event": {
+                      "$ref": "#/$defs/__schema22"
+                    },
+                    "frame": {
+                      "$ref": "#/$defs/__schema28"
+                    },
+                    "kind": {
+                      "enum": [
+                        "main-handler-invocation",
+                        "main-event-invocation",
+                        "utility-process-fork",
+                        "utility-process-message",
+                        "ipc-main-to-renderer",
+                        "ipc-utility-to-main",
+                        "ipc-renderer-send",
+                        "ipc-renderer-invoke",
+                        "ipc-renderer-post-message",
+                        "app-lifecycle",
+                        "window-lifecycle",
+                        "web-contents-lifecycle",
+                        "navigation",
+                        "shell-attempt",
+                        "process-lifecycle",
+                        "permission",
+                        "popup-attempt",
+                        "download",
+                        "protocol",
+                        "preload",
+                        "native-addon",
+                        "updater",
+                        "error"
+                      ],
+                      "type": "string"
+                    },
+                    "phase": {
+                      "$ref": "#/$defs/__schema23"
+                    },
+                    "process_type": {
+                      "$ref": "#/$defs/__schema32"
+                    },
+                    "receiver": {
+                      "$ref": "#/$defs/__schema27"
+                    },
+                    "result_shape": {
+                      "$ref": "#/$defs/__schema31"
+                    },
+                    "sender": {
+                      "$ref": "#/$defs/__schema26"
+                    },
+                    "sequence": {
+                      "$ref": "#/$defs/__schema20"
+                    },
+                    "source": {
+                      "$ref": "#/$defs/__schema33"
+                    },
+                    "target": {
+                      "$ref": "#/$defs/__schema29"
+                    }
+                  },
+                  "required": [
+                    "sequence",
+                    "correlation_id",
+                    "kind",
+                    "event",
+                    "phase",
+                    "channel",
+                    "direction",
+                    "sender",
+                    "receiver",
+                    "frame",
+                    "target",
+                    "argument_shapes",
+                    "result_shape",
+                    "process_type",
+                    "source",
+                    "capture_method",
+                    "artifact_path",
+                    "artifact_sha256",
+                    "error"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "observed": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "events",
+              "observed",
+              "dropped"
+            ],
+            "type": "object"
+          },
+          "windows": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "destroyed": {
+                  "type": "boolean"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "visible": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "web_contents_id": {
+                  "type": "string"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "window_id",
+                "web_contents_id",
+                "url",
+                "title",
+                "visible",
+                "destroyed"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "application",
+          "actions",
+          "windows",
+          "processes",
+          "ipc",
+          "timeline",
+          "retention",
+          "coverage",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema15": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema16": {
+        "enum": [
+          "click",
+          "wait",
+          "renderer-reload",
+          "renderer-crash",
+          "deep-link"
+        ],
+        "type": "string"
+      },
+      "__schema17": {
+        "anyOf": [
+          {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema18": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema19": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema21": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema22": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema23": {
+        "enum": [
+          "attempted",
+          "completed",
+          "blocked",
+          "failed",
+          "observed"
+        ],
+        "type": "string"
+      },
+      "__schema24": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema25": {
+        "anyOf": [
+          {
+            "enum": [
+              "renderer-to-main",
+              "main-to-renderer",
+              "main-to-utility",
+              "utility-to-main"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema26": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema27": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema28": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema29": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema31": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema32": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema33": {
+        "type": "string"
+      },
+      "__schema34": {
+        "enum": [
+          "api-wrapper",
+          "event-emitter",
+          "process-hook"
+        ],
+        "type": "string"
+      },
+      "__schema35": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema36": {
+        "anyOf": [
+          {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema37": {
+        "type": "boolean"
+      },
+      "__schema38": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema39": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema40": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema41": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema42": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema43"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema43"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema45"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema46"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema43"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema46"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema43": {
+        "items": {
+          "$ref": "#/$defs/__schema44"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema44": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema45": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema46": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema47"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema48"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema49"
+              },
+              {
+                "$ref": "#/$defs/__schema50"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema47": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema48": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema49": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema50": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema51": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema52": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:00d0841e3bc4afe3af1c165a295f7a8588ab8dbb2840fbe88e0d380d86db0268",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema39"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema38"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema40"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema52"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema41"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema51"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema13"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema42"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Capture Electron Scenario"
+}

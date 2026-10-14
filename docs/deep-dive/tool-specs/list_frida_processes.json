@@ -1,0 +1,151 @@
+{
+  "analysisOperation": "list_frida_processes",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "List processes observed on a selected Frida device or caller-supplied remote endpoint. A remote connection is closed after discovery; authentication values are never returned or recorded.",
+  "effects": {
+    "accessesNetwork": true,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": false,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "certificate": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "keepalive_interval": {
+            "description": "Remote keepalive interval in seconds",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "origin": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "token": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "address"
+        ],
+        "type": "object"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "device_id": "local"
+      }
+    ],
+    "properties": {
+      "device_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "remote": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "type": "object"
+  },
+  "kind": "native-provider",
+  "name": "list_frida_processes",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "pid": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "pid",
+            "name",
+            "identifier"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:8cf5d2e5bcf5cf0eedee3ebacd1339e7263189a08be49e9f2c966b20814b920a",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "cleanup_error": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "device_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "processes": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "device_id",
+      "processes",
+      "cleanup_error"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "List Frida Processes"
+}

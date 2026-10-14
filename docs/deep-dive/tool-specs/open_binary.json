@@ -1,0 +1,276 @@
+{
+  "analysisOperation": null,
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true,
+    "readOnlyHint": false
+  },
+  "description": "Open a local executable, application bundle, archive, JavaScript, source map, plist, or analysis database after validation. format=dos-com explicitly interprets 1..65280 headerless bytes as a DOS COM analysis image. format=raw-binary interprets headerless bytes with a required architecture and entry_point; file offset 0 maps at that address. Omission preserves header-based detection. provider_id selects one deep provider or deterministic auto selection; the binding remains stable until close or an explicit switch, with no failure fallback. Reopening the same target and profile retains its active database and metadata edits. An optional analysis snapshot is imported atomically and must match the binary identity, concrete provider, and canonical analysis profile exactly; importing into a session with metadata mutations requires closing and reopening it first.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": true,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute local filesystem path for the analysis target; relative paths are rejected.",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema2": {
+        "$ref": "#/$defs/__schema3",
+        "description": "Explicit headerless interpretation: dos-com or raw-binary. Omission preserves header-based detection."
+      },
+      "__schema3": {
+        "enum": [
+          "dos-com",
+          "raw-binary"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "$ref": "#/$defs/__schema5",
+        "description": "Caller-supplied CPU family. Required with format=raw-binary; rejected otherwise."
+      },
+      "__schema5": {
+        "enum": [
+          "6502",
+          "x86",
+          "x86_64",
+          "arm",
+          "arm64"
+        ],
+        "type": "string"
+      },
+      "__schema6": {
+        "$ref": "#/$defs/__schema7",
+        "description": "Caller-supplied load and entry address (0xhex). File offset 0 is mapped here. Required with format=raw-binary; rejected otherwise."
+      },
+      "__schema7": {
+        "pattern": "^0x[0-9A-Fa-f]{1,16}$",
+        "type": "string"
+      },
+      "__schema8": {
+        "anyOf": [
+          {
+            "const": "auto",
+            "type": "string"
+          },
+          {
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9\\x2d]*$",
+            "type": "string"
+          }
+        ]
+      },
+      "__schema9": {
+        "$ref": "#/$defs/__schema1",
+        "description": "Absolute local filesystem path for the analysis snapshot; relative paths are rejected.",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {
+        "path": "/tmp/fixture"
+      }
+    ],
+    "properties": {
+      "architecture": {
+        "$ref": "#/$defs/__schema4",
+        "description": "Caller-supplied CPU family. Required with format=raw-binary; rejected otherwise."
+      },
+      "entry_point": {
+        "$ref": "#/$defs/__schema6",
+        "description": "Caller-supplied load and entry address (0xhex). File offset 0 is mapped here. Required with format=raw-binary; rejected otherwise."
+      },
+      "format": {
+        "$ref": "#/$defs/__schema2",
+        "description": "Explicit headerless interpretation: dos-com or raw-binary. Omission preserves header-based detection."
+      },
+      "path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Absolute local filesystem path for the analysis target; relative paths are rejected."
+      },
+      "provider_id": {
+        "$ref": "#/$defs/__schema8",
+        "description": "Exact deep-analysis provider ID, or automatic selection when omitted."
+      },
+      "snapshot_path": {
+        "$ref": "#/$defs/__schema9",
+        "description": "Absolute local filesystem path for the analysis snapshot; relative paths are rejected."
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "type": "object"
+  },
+  "kind": "session",
+  "name": "open_binary",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "x86",
+                      "x86_64",
+                      "arm",
+                      "arm64",
+                      "mips",
+                      "riscv",
+                      "powerpc"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "format": {
+                "enum": [
+                  "hopper",
+                  "analysis-database",
+                  "mach-o",
+                  "mach-o-universal",
+                  "elf",
+                  "pe",
+                  "dos-mz",
+                  "dos-com",
+                  "zip",
+                  "ipa",
+                  "apk",
+                  "msix",
+                  "appx",
+                  "hap",
+                  "hsp",
+                  "app-pack",
+                  "asar",
+                  "dmg",
+                  "pkg",
+                  "plist",
+                  "javascript",
+                  "source-map"
+                ],
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "executable",
+                  "database",
+                  "archive",
+                  "artifact"
+                ],
+                "type": "string"
+              },
+              "path": {
+                "$ref": "#/$defs/__schema1"
+              },
+              "sha256": {
+                "$ref": "#/$defs/__schema2"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "sha256",
+              "format",
+              "architecture"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "enum": [
+                  "6502",
+                  "x86",
+                  "x86_64",
+                  "arm",
+                  "arm64"
+                ],
+                "type": "string"
+              },
+              "entry_point": {
+                "description": "Canonical caller-selected address where raw file offset 0 is mapped and execution is seeded.",
+                "pattern": "^0x[0-9A-Fa-f]{1,16}$",
+                "type": "string"
+              },
+              "format": {
+                "const": "raw-binary",
+                "type": "string"
+              },
+              "kind": {
+                "const": "executable",
+                "type": "string"
+              },
+              "path": {
+                "$ref": "#/$defs/__schema1"
+              },
+              "sha256": {
+                "$ref": "#/$defs/__schema2"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "sha256",
+              "format",
+              "architecture",
+              "entry_point"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:5fdef6e3da54e6db64f32aece2806c2266d24c1ce9c19a9cd3811e8343753169",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "result": {
+        "$ref": "#/$defs/__schema0"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "type": "object"
+  },
+  "requiresSession": true,
+  "title": "Open Binary"
+}

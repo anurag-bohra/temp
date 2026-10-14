@@ -1,0 +1,1328 @@
+{
+  "analysisOperation": "inspect_managed_native_boundaries",
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false,
+    "readOnlyHint": false
+  },
+  "description": "Inspect PE/CLI ModuleRef, ImplMap/PInvoke declarations, CLI native-header indicators, and non-IL method implementation flags without loading or executing target code. Results are managed declarations and degraded native-boundary observations, not verified native exports or addresses.",
+  "effects": {
+    "accessesNetwork": false,
+    "changesUiState": false,
+    "executesForeignCode": false,
+    "idempotent": true,
+    "launchesProcess": false,
+    "mayDiscardData": false,
+    "mutatesDevice": false,
+    "mutatesSession": true,
+    "mutatesTarget": false,
+    "writesFilesystem": false
+  },
+  "inputSchema": {
+    "$defs": {
+      "__schema0": {
+        "description": "Explicit absolute managed PE/CLI path; omit to reuse the previously selected managed target",
+        "minLength": 1,
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "examples": [
+      {}
+    ],
+    "properties": {
+      "path": {
+        "$ref": "#/$defs/__schema0",
+        "description": "Explicit absolute managed PE/CLI path; omit to reuse the previously selected managed target"
+      }
+    },
+    "type": "object"
+  },
+  "kind": "managed-provider",
+  "name": "inspect_managed_native_boundaries",
+  "outputSchema": {
+    "$defs": {
+      "__schema0": {
+        "pattern": "^ev_[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema1": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "enum": [
+                      "hopper",
+                      "analysis-database",
+                      "mach-o",
+                      "elf",
+                      "pe",
+                      "dos-mz",
+                      "dos-com",
+                      "zip",
+                      "ipa",
+                      "apk",
+                      "msix",
+                      "appx",
+                      "hap",
+                      "hsp",
+                      "app-pack",
+                      "asar",
+                      "dmg",
+                      "pkg",
+                      "plist",
+                      "javascript",
+                      "source-map",
+                      "directory",
+                      "file",
+                      "unknown",
+                      "mach-o-universal",
+                      "javascript-bundle",
+                      "entitlements"
+                    ],
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "architecture": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "6502",
+                          "x86",
+                          "x86_64",
+                          "arm",
+                          "arm64",
+                          "mips",
+                          "riscv",
+                          "powerpc"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "digest": {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  "format": {
+                    "const": "raw-binary",
+                    "type": "string"
+                  },
+                  "local_path": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "name": {
+                    "$ref": "#/$defs/__schema2"
+                  }
+                },
+                "required": [
+                  "name",
+                  "digest",
+                  "local_path",
+                  "format",
+                  "architecture"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema10": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "anyOf": [
+          {},
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact": {
+            "additionalProperties": false,
+            "properties": {
+              "byte_length": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "format": {
+                "const": "pe",
+                "type": "string"
+              },
+              "path": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "sha256": {
+                "$ref": "#/$defs/__schema4"
+              }
+            },
+            "required": [
+              "path",
+              "sha256",
+              "byte_length",
+              "format"
+            ],
+            "type": "object"
+          },
+          "cli_native": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "il_only": {
+                    "type": "boolean"
+                  },
+                  "managed_native_header_rva": {
+                    "maximum": 4294967295,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "managed_native_header_size": {
+                    "maximum": 4294967295,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "native_entry_point": {
+                    "type": "boolean"
+                  },
+                  "ready_to_run_signature": {
+                    "type": "boolean"
+                  },
+                  "requires_32bit": {
+                    "type": "boolean"
+                  },
+                  "strong_name_signed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "il_only",
+                  "requires_32bit",
+                  "strong_name_signed",
+                  "native_entry_point",
+                  "ready_to_run_signature",
+                  "managed_native_header_rva",
+                  "managed_native_header_size"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coverage": {
+            "additionalProperties": false,
+            "properties": {
+              "issues": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "resource-limit",
+                        "invalid-cli-header",
+                        "invalid-directory",
+                        "invalid-metadata-root",
+                        "invalid-stream",
+                        "missing-stream",
+                        "invalid-tables",
+                        "invalid-row",
+                        "invalid-heap-index",
+                        "invalid-string",
+                        "invalid-blob",
+                        "unsupported-signature",
+                        "invalid-guid",
+                        "invalid-resource"
+                      ],
+                      "type": "string"
+                    },
+                    "detail": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "offset": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/__schema16"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "scope": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "scope",
+                    "offset",
+                    "detail"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "state": {
+                "enum": [
+                  "complete",
+                  "partial",
+                  "unavailable"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "state",
+              "issues"
+            ],
+            "type": "object"
+          },
+          "identity_scope": {
+            "additionalProperties": false,
+            "properties": {
+              "requires_artifact_sha256": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "requires_mvid": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema14"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "token_identity": {
+                "const": "build-local",
+                "type": "string"
+              }
+            },
+            "required": [
+              "token_identity",
+              "requires_artifact_sha256",
+              "requires_mvid"
+            ],
+            "type": "object"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "enum": [
+                  "absent",
+                  "complete",
+                  "partial",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              "table_row_counts": {
+                "additionalProperties": {
+                  "maximum": 4294967295,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "version",
+              "table_row_counts"
+            ],
+            "type": "object"
+          },
+          "module": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "enc_base_id": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/__schema14"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "enc_id": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/__schema14"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "generation": {
+                    "maximum": 65535,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "mvid": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/__schema14"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "row_offset": {
+                    "$ref": "#/$defs/__schema16"
+                  },
+                  "token": {
+                    "$ref": "#/$defs/__schema15"
+                  }
+                },
+                "required": [
+                  "name",
+                  "generation",
+                  "mvid",
+                  "enc_id",
+                  "enc_base_id",
+                  "token",
+                  "row_offset"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "module_refs": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "row_offset": {
+                  "$ref": "#/$defs/__schema16"
+                },
+                "token": {
+                  "$ref": "#/$defs/__schema15"
+                }
+              },
+              "required": [
+                "token",
+                "row_offset",
+                "name"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "native_implementations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "body_interpretation": {
+                  "enum": [
+                    "managed-cil",
+                    "native-or-runtime",
+                    "not-file-backed",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "boundary_kind": {
+                  "enum": [
+                    "pinvoke",
+                    "native-body",
+                    "runtime-provided",
+                    "unmanaged-method",
+                    "mixed-or-unknown"
+                  ],
+                  "type": "string"
+                },
+                "code_type": {
+                  "enum": [
+                    "il",
+                    "native",
+                    "optil",
+                    "runtime",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "flags": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "impl_flags": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "managed_kind": {
+                  "enum": [
+                    "managed",
+                    "unmanaged",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "pinvoke_declared": {
+                  "type": "boolean"
+                },
+                "row_offset": {
+                  "$ref": "#/$defs/__schema16"
+                },
+                "rva": {
+                  "maximum": 4294967295,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "token": {
+                  "$ref": "#/$defs/__schema15"
+                }
+              },
+              "required": [
+                "token",
+                "row_offset",
+                "name",
+                "rva",
+                "flags",
+                "impl_flags",
+                "code_type",
+                "managed_kind",
+                "pinvoke_declared",
+                "boundary_kind",
+                "body_interpretation"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "pinvoke_imports": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "best_fit": {
+                  "enum": [
+                    "assembly-default",
+                    "enabled",
+                    "disabled",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "call_convention": {
+                  "enum": [
+                    "not-specified",
+                    "winapi",
+                    "cdecl",
+                    "stdcall",
+                    "thiscall",
+                    "fastcall",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "char_set": {
+                  "enum": [
+                    "not-specified",
+                    "ansi",
+                    "unicode",
+                    "auto",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "import_name": {
+                  "type": "string"
+                },
+                "import_scope_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "import_scope_token": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema15"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "mapping_flags": {
+                  "maximum": 65535,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "mapping_flags_hex": {
+                  "pattern": "^0x[0-9a-f]{4}$",
+                  "type": "string"
+                },
+                "member_kind": {
+                  "enum": [
+                    "method",
+                    "field",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "member_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "member_token": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema15"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_mangle": {
+                  "type": "boolean"
+                },
+                "row_offset": {
+                  "$ref": "#/$defs/__schema16"
+                },
+                "supports_last_error": {
+                  "type": "boolean"
+                },
+                "throw_on_unmappable_char": {
+                  "enum": [
+                    "assembly-default",
+                    "enabled",
+                    "disabled",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "token": {
+                  "$ref": "#/$defs/__schema15"
+                },
+                "verification": {
+                  "const": "managed-declaration-only",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "token",
+                "row_offset",
+                "mapping_flags",
+                "mapping_flags_hex",
+                "member_token",
+                "member_kind",
+                "member_name",
+                "import_name",
+                "import_scope_token",
+                "import_scope_name",
+                "no_mangle",
+                "char_set",
+                "call_convention",
+                "supports_last_error",
+                "best_fit",
+                "throw_on_unmappable_char",
+                "verification"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "additionalProperties": false,
+            "properties": {
+              "mixed_mode_or_native_header": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "module_ref_count": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "native_implementation_count": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "pinvoke_import_count": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "ready_to_run": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "module_ref_count",
+              "pinvoke_import_count",
+              "native_implementation_count",
+              "ready_to_run",
+              "mixed_mode_or_native_header"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "artifact",
+          "module",
+          "metadata",
+          "identity_scope",
+          "cli_native",
+          "module_refs",
+          "pinvoke_imports",
+          "native_implementations",
+          "summary",
+          "coverage",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "pattern": "^[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$",
+        "type": "string"
+      },
+      "__schema15": {
+        "pattern": "^0x[0-9a-f]{8}$",
+        "type": "string"
+      },
+      "__schema16": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema17": {
+        "enum": [
+          "observed",
+          "derived",
+          "inferred"
+        ],
+        "type": "string"
+      },
+      "__schema18": {
+        "enum": [
+          "shipped-artifact",
+          "controlled-replay",
+          "historical-reference",
+          "external-service",
+          "analyst-inference"
+        ],
+        "type": "string"
+      },
+      "__schema19": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "architecture": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "isolation": {
+                "enum": [
+                  "none",
+                  "process",
+                  "container",
+                  "virtual-machine"
+                ],
+                "type": "string"
+              },
+              "platform": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "platform",
+              "architecture",
+              "isolation"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema21": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema22"
+                  },
+                  "status": {
+                    "const": "complete",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema22"
+                  },
+                  "limitations": {
+                    "items": {
+                      "$ref": "#/$defs/__schema24"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema25"
+                  },
+                  "status": {
+                    "const": "partial",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "limitations"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "diagnostics": {
+                    "$ref": "#/$defs/__schema22"
+                  },
+                  "limited_directions": {
+                    "$ref": "#/$defs/__schema25"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "status": {
+                    "const": "unknown",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "__schema22": {
+        "items": {
+          "$ref": "#/$defs/__schema23"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema23": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema24": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema25": {
+        "anyOf": [
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema26"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 1,
+            "minItems": 1,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema27"
+              }
+            ],
+            "type": "array"
+          },
+          {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/__schema28"
+              },
+              {
+                "$ref": "#/$defs/__schema29"
+              }
+            ],
+            "type": "array"
+          }
+        ]
+      },
+      "__schema26": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema27": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema28": {
+        "const": "callers",
+        "type": "string"
+      },
+      "__schema29": {
+        "const": "callees",
+        "type": "string"
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "__schema30": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "address"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "kind": {
+                  "const": "address-range",
+                  "type": "string"
+                },
+                "start": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "artifact-path",
+                  "type": "string"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "path"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "file-offset",
+                  "type": "string"
+                },
+                "offset": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "offset"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "end": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "file-offset-range",
+                  "type": "string"
+                },
+                "start": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema31": {
+        "items": {
+          "pattern": "^ev_[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema4": {
+        "pattern": "^[a-f0-9]{64}$",
+        "type": "string"
+      },
+      "__schema5": {
+        "pattern": "^[^\\x00]*$",
+        "type": "string"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "parameters": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "provider": {
+                "$ref": "#/$defs/__schema8"
+              }
+            },
+            "required": [
+              "provider",
+              "parameters",
+              "digest"
+            ],
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "__schema8": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "version"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "$id": "urn:rea:tool-output:sha256:f90291a601f9e45b7fcdf27b53ee457b91ca2e2ee1b3cf24260228ac08732fcb",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "analysis_profile": {
+        "$ref": "#/$defs/__schema7"
+      },
+      "authority": {
+        "$ref": "#/$defs/__schema18"
+      },
+      "confidence": {
+        "$ref": "#/$defs/__schema17"
+      },
+      "environment": {
+        "$ref": "#/$defs/__schema19"
+      },
+      "evidence_id": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "evidence_links": {
+        "$ref": "#/$defs/__schema31"
+      },
+      "limitations": {
+        "$ref": "#/$defs/__schema20"
+      },
+      "locations": {
+        "$ref": "#/$defs/__schema30"
+      },
+      "normalized_result": {
+        "$ref": "#/$defs/__schema13"
+      },
+      "operation": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "parameters": {
+        "$ref": "#/$defs/__schema9"
+      },
+      "predicate_type": {
+        "$ref": "#/$defs/__schema10"
+      },
+      "provider": {
+        "$ref": "#/$defs/__schema6"
+      },
+      "raw_result": {
+        "$ref": "#/$defs/__schema12"
+      },
+      "relationship_coverage": {
+        "$ref": "#/$defs/__schema21"
+      },
+      "subject": {
+        "$ref": "#/$defs/__schema1"
+      }
+    },
+    "required": [
+      "evidence_id",
+      "subject",
+      "provider",
+      "analysis_profile",
+      "predicate_type",
+      "operation",
+      "parameters",
+      "raw_result",
+      "normalized_result",
+      "confidence",
+      "authority",
+      "environment",
+      "limitations",
+      "relationship_coverage",
+      "locations",
+      "evidence_links"
+    ],
+    "type": "object"
+  },
+  "requiresSession": false,
+  "title": "Inspect Managed Native Boundaries"
+}
