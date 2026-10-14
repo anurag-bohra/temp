@@ -9,3 +9,4 @@ export * from "./static.ts";
 export * from "./store.ts";
 export * from "./exporters/index.ts";
 export * from "./pipeline.ts";
+export * from "./integrations.ts";

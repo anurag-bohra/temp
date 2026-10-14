@@ -28,8 +28,10 @@ export function stripUnsafe(raw: string): { text: string; counts: StripCounts; s
   const smuggled = decodeTags(raw);
   let s = raw;
   const counts: StripCounts = { ansi: 0, control: 0, bidi: 0, invisible: 0, unicode_tags: 0, closing_tag_neutralised: 0 };
-  counts.ansi = count(s, ANSI_OSC) + count(s, ANSI_CSI) + count(s, ANSI_ESC2);
-  s = s.replace(ANSI_OSC, "").replace(ANSI_CSI, "").replace(ANSI_ESC2, "");
+  // count sequentially so a sequence consumed by an earlier pattern (e.g. OSC starting with ESC ]) is not counted again by a later one
+  counts.ansi = count(s, ANSI_OSC); s = s.replace(ANSI_OSC, "");
+  counts.ansi += count(s, ANSI_CSI); s = s.replace(ANSI_CSI, "");
+  counts.ansi += count(s, ANSI_ESC2); s = s.replace(ANSI_ESC2, "");
   counts.unicode_tags = count(s, TAGS); s = s.replace(TAGS, "");
   counts.bidi = count(s, BIDI); s = s.replace(BIDI, "");
   counts.invisible = count(s, INVISIBLE); s = s.replace(INVISIBLE, "");
@@ -59,7 +61,7 @@ const FETCH_VERB = /\b(?:fetch|download|visit|open|browse|navigate|curl|wget|ret
 export function detectInjection(text: string, o: { where: string; toolNames?: readonly string[]; smuggled?: string; max?: number }): Detection[] {
   const out: Detection[] = []; const max = o.max ?? 25;
   const scan = text.length > 2_000_000 ? text.slice(0, 2_000_000) : text;
-  const push = (id: string, severity: Detection["severity"], offset: number, m: string) => { if (out.length < max) out.push({ id, severity, offset, match: m.replace(/\s+/gu, " ").slice(0, 160), where: o.where }); };
+  const push = (id: string, severity: Detection["severity"], offset: number, m: string) => { if (out.length < max) out.push({ id, severity, offset, match: `[matched text withheld: ${m.length} chars, sha256=${sha256(m).slice(0, 16)}]`, where: o.where }); };
   for (const p of INJECTION_PATTERNS) { p.re.lastIndex = 0; for (let m = p.re.exec(scan); m && out.length < max; m = p.re.exec(scan)) { push(p.id, p.severity, m.index, m[0]); if (m[0].length === 0) p.re.lastIndex++; } }
   if (o.toolNames?.length) {
     const names = o.toolNames.filter((n) => n.length >= 6).map((n) => n.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"));
