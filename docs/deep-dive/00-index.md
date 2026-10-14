@@ -10,6 +10,7 @@ Source: https://github.com/morluto/rea (HEAD `f75b1a4`, shallow clone, built loc
 | [12-ai-layer-prompts-and-skills.md](12-ai-layer-prompts-and-skills.md) | Six guided prompts (verbatim + rendered), completion, chaining, sequence diagrams, porting to malware agents |
 | [12 part b](12-ai-layer-prompts-and-skills-part-b-bundled-skill-verbatim.md) | Bundled skill `SKILL.md` + 6 references, verbatim |
 | [12 part c](12-ai-layer-prompts-and-skills-part-c-repo-skills-and-llm-text.md) | Repo skills, AGENTS.md, tool-design, RE-tools guide, verbatim |
+| [25-capabilities-reference.md](25-capabilities-reference.md) | **Every capability in detail**: 18 families, 207 tools with verbatim agent-facing descriptions, tier, providers, CLI mapping, requirements, malware-analysis use; provider list |
 | [13-tool-catalog-index.md](13-tool-catalog-index.md), [catalog/](catalog/), [tool-specs/](tool-specs/) | All 207 tools: verbatim input schemas (catalog), full specs incl. output schemas (tool-specs), effects matrix |
 
 ## Supporting chapters (written)
@@ -18,7 +19,7 @@ Source: https://github.com/morluto/rea (HEAD `f75b1a4`, shallow clone, built loc
 | [02-architecture-and-module-map.md](02-architecture-and-module-map.md) | Architecture, module map, env vars, build/runtime | complete |
 | [10-evidence-model-ledger-unknowns-bundles.md](10-evidence-model-ledger-unknowns-bundles.md) | Evidence schema, ledger, unknowns, bundles | complete |
 | [11-comparison-snapshots-analysis-view-reconstruction.md](11-comparison-snapshots-analysis-view-reconstruction.md) | Comparison, snapshots, analysis view, reconstruction | complete; 2 parts read from source only |
-| [23-defensive-malware-analysis-playbook.md](23-defensive-malware-analysis-playbook.md) | Risk tiers, static-first triage, gaps | concise synthesis |
+| [23-defensive-malware-analysis-playbook.md](23-defensive-malware-analysis-playbook.md) | Risk tiers, 8 scenario tool-chains, sequence diagram, reuse plan, gaps | complete synthesis |
 | [24-porting-blueprints.md](24-porting-blueprints.md) | 13 liftable sub-tools with deps | concise synthesis |
 
 ## Partial chapters (writers stopped early to save credits — treat as incomplete, unverified tail)
@@ -31,7 +32,7 @@ Source: https://github.com/morluto/rea (HEAD `f75b1a4`, shallow clone, built loc
 | [16-javascript-electron-analysis.md](16-javascript-electron-analysis.md), [17-browser-and-web-observation.md](17-browser-and-web-observation.md) | JS/Electron, browser |
 
 ## Not written
-09 (IDA/Cutter/Rizin/GDB/objdump), 15 (.NET/firmware/WASM/EVM/misc formats), 18 (process capture/Frida), 19 (Android), 20 (pcap/signals), 21 (security model), 22 (end-to-end workflows), 25 (gaps) — covered only by the tool catalog and the brief mentions above. Resume these if needed.
+25 is now the capabilities reference (no gaps chapter). Missing: 09 (IDA/Cutter/Rizin/GDB/objdump), 15 (.NET/firmware/WASM/EVM/misc formats), 18 (process capture/Frida), 19 (Android), 20 (pcap/signals), 21 (security model), 22 (end-to-end workflows; see 23 §6 and 12 §12.11 instead) — covered only by the tool catalog and the brief mentions above. Resume these if needed.
 
 ## Discrepancies found (code vs docs)
 - Attached CLAUDE.md predates the code (Hopper/Ghidra only vs 47 providers).
